@@ -11,6 +11,7 @@ import { rawExecTool } from '../src/tools/meta.js';
 import { pkgInstallTool, pkgUpdateTool } from '../src/tools/pkg.js';
 import type { ToolContext } from '../src/tools/registry.js';
 import { svcActionTool } from '../src/tools/svc.js';
+import { tokenOf } from './confirmation.js';
 
 interface Reply {
   stdout: string;
@@ -146,10 +147,7 @@ describe('svc_action', () => {
       { unit: 'nginx.service', action: 'restart', dry_run: false },
       context(conn, { ARCH_MCP_MODE: 'write' }),
     );
-    assert.equal(confirm.ok, false);
-    if (confirm.ok) return;
-    assert.equal(confirm.error.code, 'E_CONFIRM');
-    const token = (confirm.error.data as { token: string }).token;
+    const token = tokenOf(confirm);
     assert.match(token, /^[0-9a-f]{8}$/);
     assert.equal(conn.calls.length, 0);
   });
@@ -164,9 +162,7 @@ describe('svc_action', () => {
       { unit: 'nginx.service', action: 'restart', dry_run: false },
       context(conn, { ARCH_MCP_MODE: 'write' }),
     );
-    assert.equal(first.ok, false);
-    if (first.ok) return;
-    const token = (first.error.data as { token: string }).token;
+    const token = tokenOf(first);
     const done = await svcActionTool.handler(
       { unit: 'nginx.service', action: 'restart', dry_run: false, token },
       context(conn, { ARCH_MCP_MODE: 'write' }),
@@ -202,9 +198,7 @@ describe('svc_action', () => {
       { unit: 'app.service', action: 'start', dry_run: false },
       context(conn, { ARCH_MCP_MODE: 'write' }),
     );
-    assert.equal(first.ok, false);
-    if (first.ok) return;
-    const token = (first.error.data as { token: string }).token;
+    const token = tokenOf(first);
     const done = await svcActionTool.handler(
       { unit: 'app.service', action: 'start', dry_run: false, token },
       context(conn, { ARCH_MCP_MODE: 'write' }),
@@ -229,8 +223,7 @@ describe('svc_action', () => {
       { unit: 'app.service', action: 'start', dry_run: false },
       context(conn, { ARCH_MCP_MODE: 'write' }),
     );
-    if (first.ok) return;
-    const token = (first.error.data as { token: string }).token;
+    const token = tokenOf(first);
     const done = await svcActionTool.handler(
       { unit: 'app.service', action: 'start', dry_run: false, token },
       context(conn, { ARCH_MCP_MODE: 'write' }),
@@ -262,9 +255,7 @@ describe('fs_write', () => {
       { path: '/tmp/test.conf', content: 'hello\n', mode: '640', dry_run: false },
       context(conn, { ARCH_MCP_MODE: 'write' }),
     );
-    assert.equal(first.ok, false);
-    if (first.ok) return;
-    const token = (first.error.data as { token: string }).token;
+    const token = tokenOf(first);
     const done = await fsWriteTool.handler(
       { path: '/tmp/test.conf', content: 'hello\n', mode: '640', dry_run: false, token },
       context(conn, { ARCH_MCP_MODE: 'write' }),
@@ -298,9 +289,7 @@ describe('pkg mutations', () => {
       { names: ['htop'], dry_run: false },
       context(conn, { ARCH_MCP_MODE: 'write' }),
     );
-    assert.equal(first.ok, false);
-    if (first.ok) return;
-    const token = (first.error.data as { token: string }).token;
+    const token = tokenOf(first);
     const done = await pkgInstallTool.handler(
       { names: ['htop'], dry_run: false, token },
       context(conn, { ARCH_MCP_MODE: 'write' }),
@@ -319,8 +308,7 @@ describe('pkg mutations', () => {
       { names: ['ghost'], dry_run: false },
       context(conn, { ARCH_MCP_MODE: 'write' }),
     );
-    if (first.ok) return;
-    const token = (first.error.data as { token: string }).token;
+    const token = tokenOf(first);
     const done = await pkgInstallTool.handler(
       { names: ['ghost'], dry_run: false, token },
       context(conn, { ARCH_MCP_MODE: 'write' }),
@@ -368,9 +356,7 @@ describe('raw_exec', () => {
       { argv: ['uname', '-a'], timeout_ms: 1000, dry_run: false },
       context(conn, { ARCH_MCP_MODE: 'admin', ARCH_MCP_ALLOW_RAW: '1' }),
     );
-    assert.equal(first.ok, false);
-    if (first.ok) return;
-    const token = (first.error.data as { token: string }).token;
+    const token = tokenOf(first);
     const done = await rawExecTool.handler(
       { argv: ['uname', '-a'], timeout_ms: 1000, dry_run: false, token },
       context(conn, { ARCH_MCP_MODE: 'admin', ARCH_MCP_ALLOW_RAW: '1' }),

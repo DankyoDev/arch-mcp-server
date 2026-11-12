@@ -76,8 +76,8 @@ const RULES: readonly DenyRule[] = [
   },
   {
     id: 'containers',
-    reason: 'container tools are out of scope for this MCP',
-    hint: 'use the homelab MCP; the 2026-11-12 incident came from docker run --privileged',
+    reason: 'container CLIs are not available through exec',
+    hint: 'use docker_ps, docker_logs, docker_inspect or docker_compose',
     test: (argv) => ['docker', 'podman', 'docker-compose', 'nerdctl'].includes(argv[0] ?? ''),
   },
   {
@@ -168,6 +168,8 @@ const SUDO_BINARIES = new Set(['sudo', 'su', 'doas', 'pkexec']);
 export interface DenyOptions {
   allowSudo?: boolean;
   sudoAllow?: readonly string[];
+  /** Set by the native docker tools: they are the only sanctioned container path. */
+  allowContainers?: boolean;
 }
 
 /** Evaluate the process denylist on a fully built argv (docs/05-security.md §4). */
@@ -186,6 +188,7 @@ export function checkDenylist(argv: readonly string[], options: DenyOptions = {}
 
   const joined = argv.join(' ').toLowerCase();
   for (const rule of RULES) {
+    if (rule.id === 'containers' && options.allowContainers === true) continue;
     if (rule.test(argv, joined)) return policy(rule.reason, rule.hint, rule.id);
   }
   return null;

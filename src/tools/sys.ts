@@ -23,7 +23,7 @@ import {
   parseTopOutput,
 } from '../parse/proc.js';
 import { parseUnitsJson } from '../parse/systemd.js';
-import { createConfirmation, consumeConfirmation } from '../policy/confirm.js';
+import { confirmationPayload, consumeConfirmation } from '../policy/confirm.js';
 import { defineTool, toolData } from './registry.js';
 import type { ToolContext } from './registry.js';
 
@@ -349,23 +349,29 @@ export const procKillTool = defineTool({
     }
 
     if (input.dry_run) {
-      return ok(toolData({ pid: input.pid, signal: input.signal, result: 'dry_run' }));
+      return ok(
+        toolData({
+          pid: input.pid,
+          signal: input.signal,
+          result: 'dry_run',
+          ...confirmationPayload('proc_kill', input, ctx.config.confirmTtl),
+        }),
+      );
     }
 
     if (input.token === undefined) {
-      const confirmation = createConfirmation('proc_kill', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: {
-          pid: input.pid,
-          signal: input.signal,
-          effect: `PID ${input.pid} receives SIG${input.signal}`,
-        },
-      });
+      return ok(
+        toolData(
+          confirmationPayload('proc_kill', input, ctx.config.confirmTtl, {
+            pid: input.pid,
+            signal: input.signal,
+            effect: `PID ${input.pid} receives SIG${input.signal}`,
+          }),
+        ),
+      );
     }
 
-    const consumed = consumeConfirmation(input.token, 'proc_kill', input as unknown as Record<string, unknown>);
+    const consumed = consumeConfirmation(input.token, 'proc_kill', input);
     if (!consumed.ok) return consumed;
 
     const sent = await runCommand(ctx.conn, ['kill', '-s', input.signal, String(input.pid)], {

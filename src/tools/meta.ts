@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { err, ok } from '../core/result.js';
 import { runCommand } from '../exec/run.js';
-import { createConfirmation, consumeConfirmation } from '../policy/confirm.js';
+import { confirmationPayload, consumeConfirmation } from '../policy/confirm.js';
 import { defineTool, toolData } from './registry.js';
 
 const READ = {
@@ -99,17 +99,27 @@ export const rawExecTool = defineTool({
     if (!RAW_ALLOWED.has(binary)) {
       return err('E_POLICY', `${binary} is not in the raw_exec allowlist`, 'use a task tool instead');
     }
-    if (input.dry_run) return ok(toolData({ argv: input.argv, result: 'dry_run' }));
+    if (input.dry_run) {
+      return ok(
+        toolData({
+          argv: input.argv,
+          result: 'dry_run',
+          ...confirmationPayload('raw_exec', input, ctx.config.confirmTtl),
+        }),
+      );
+    }
 
     if (input.token === undefined) {
-      const confirmation = createConfirmation('raw_exec', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: { argv: input.argv, effect: 'runs directly on the host' },
-      });
+      return ok(
+        toolData(
+          confirmationPayload('raw_exec', input, ctx.config.confirmTtl, {
+            argv: input.argv,
+            effect: 'runs directly on the host',
+          }),
+        ),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'raw_exec', input as unknown as Record<string, unknown>);
+    const consumed = consumeConfirmation(input.token, 'raw_exec', input);
     if (!consumed.ok) return consumed;
 
     const result = await runCommand(ctx.conn, input.argv, {

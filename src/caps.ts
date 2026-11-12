@@ -79,6 +79,7 @@ const KNOWN_TOOLS = [
   'file',
   'sha256sum',
   'base64',
+  'docker',
 ] as const;
 
 const SECTIONS: readonly SectionSpec[] = [
@@ -152,6 +153,7 @@ export function buildCapabilities(
     git: has('git'),
     python3: has('python3'),
     node: has('node'),
+    docker: has('docker'),
   };
 
   const capabilities: HostCapabilities = {

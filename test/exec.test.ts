@@ -12,6 +12,7 @@ import { resetConfirmations } from '../src/policy/confirm.js';
 import { readGaps, redactArgv, summarizeGaps } from '../src/policy/gaps.js';
 import { execAnyTool, execGapsTool, execTool, gapReportTool, scriptRunTool } from '../src/tools/exec.js';
 import type { ToolContext } from '../src/tools/registry.js';
+import { tokenOf } from './confirmation.js';
 
 interface Reply {
   stdout: string;
@@ -97,14 +98,9 @@ describe('exec', () => {
     const conn = new ScriptedConnection(() => ({ stdout: 'src/a.ts:1:TODO\n' }));
     const ctx = context(conn);
     const first = await execTool.handler({ ...base, argv: ['rg', 'TODO', 'src'] }, ctx);
-    assert.equal(first.ok, false);
-    if (first.ok) return;
-    assert.equal(first.error.code, 'E_CONFIRM');
+    const token = tokenOf(first);
 
-    const second = await execTool.handler(
-      { ...base, argv: ['rg', 'TODO', 'src'], token: (first.error.data as { token: string }).token },
-      ctx,
-    );
+    const second = await execTool.handler({ ...base, argv: ['rg', 'TODO', 'src'], token }, ctx);
     assert.equal(second.ok, true);
     assert.ok(conn.calls[0]?.includes('rg TODO src'));
 
@@ -148,12 +144,7 @@ describe('exec_any', () => {
     const conn = new ScriptedConnection(() => ({ stdout: 'croc 10.0\n' }));
     const ctx = context(conn, { ARCH_MCP_MODE: 'admin', ARCH_MCP_ALLOW_ANY_EXEC: '1' });
     const first = await execAnyTool.handler({ ...base, argv: ['croc', '--version'] }, ctx);
-    assert.equal(first.ok, false);
-    if (first.ok) return;
-    const second = await execAnyTool.handler(
-      { ...base, argv: ['croc', '--version'], token: (first.error.data as { token: string }).token },
-      ctx,
-    );
+    const second = await execAnyTool.handler({ ...base, argv: ['croc', '--version'], token: tokenOf(first) }, ctx);
     assert.equal(second.ok, true);
     assert.equal(readGaps(ctx.config)[0]?.binary, 'croc');
   });
@@ -185,9 +176,7 @@ describe('script_run', () => {
       token: undefined,
     };
     const first = await scriptRunTool.handler(input, ctx);
-    assert.equal(first.ok, false);
-    if (first.ok) return;
-    const second = await scriptRunTool.handler({ ...input, token: (first.error.data as { token: string }).token }, ctx);
+    const second = await scriptRunTool.handler({ ...input, token: tokenOf(first) }, ctx);
     assert.equal(second.ok, true);
     if (!second.ok) return;
     const data = second.data.data as Record<string, unknown>;
@@ -213,9 +202,7 @@ describe('script_run', () => {
       token: undefined,
     };
     const first = await scriptRunTool.handler(input, ctx);
-    assert.equal(first.ok, false);
-    if (first.ok) return;
-    const second = await scriptRunTool.handler({ ...input, token: (first.error.data as { token: string }).token }, ctx);
+    const second = await scriptRunTool.handler({ ...input, token: tokenOf(first) }, ctx);
     assert.equal(second.ok, true);
     assert.ok(conn.calls[0]?.includes('bash /tmp/existing.sh a b'));
     assert.equal(conn.inputs[0], undefined);
@@ -229,10 +216,8 @@ describe('gap reporting', () => {
       { ...base, argv: ['curl', '--token', 'secret-value', 'https://user:pass@example.com/x'], dry_run: false },
       ctx,
     );
-    assert.equal(first.ok, false);
-    if (first.ok) return;
     await execTool.handler(
-      { ...base, argv: ['curl', '--token', 'secret-value', 'https://user:pass@example.com/x'], token: (first.error.data as { token: string }).token },
+      { ...base, argv: ['curl', '--token', 'secret-value', 'https://user:pass@example.com/x'], token: tokenOf(first) },
       ctx,
     );
     await gapReportTool.handler({ binary: 'croc', argv: ['croc', 'send', 'x'], note: 'plain ssh', exit: 0 }, ctx);
@@ -249,6 +234,39 @@ describe('gap reporting', () => {
     const raw = readFileSync(ctx.config.gapLog, 'utf8');
     assert.ok(!raw.includes('secret-value'));
     assert.ok(raw.includes('[redacted]'));
+  });
+
+  it('reports which binaries a script used', async () => {
+    const conn = new ScriptedConnection(() => ({ stdout: 'ok\n' }));
+    const ctx = context(conn, { ARCH_MCP_MODE: 'admin', ARCH_MCP_ALLOW_SCRIPTS: '1' });
+    const input = {
+      language: 'bash' as const,
+      source: 'docker ps -a\ndocker logs mindustry\nls -1 /tmp',
+      args: [],
+      timeout_ms: 1000,
+      max_bytes: 4096,
+      keep: false,
+      dry_run: false,
+      token: undefined,
+    };
+    const second = await scriptRunTool.handler({ ...input, token: tokenOf(await scriptRunTool.handler(input, ctx)) }, ctx);
+    assert.equal(second.ok, true);
+
+    const gaps = readGaps(ctx.config);
+    assert.equal(gaps[0]?.binary, 'script:bash');
+    assert.deepEqual(gaps[0]?.commands, ['docker', 'ls']);
+
+    const summary = await execGapsTool.handler({ limit: 10 }, ctx);
+    assert.equal(summary.ok, true);
+    if (!summary.ok) return;
+    const data = summary.data.data as { binaries: Array<{ binary: string; count: number; via?: string }> };
+    assert.deepEqual(
+      data.binaries.map((entry) => [entry.binary, entry.count, entry.via]),
+      [
+        ['docker', 1, 'script_run'],
+        ['ls', 1, 'script_run'],
+      ],
+    );
   });
 
   it('redacts flag values and URL userinfo', () => {

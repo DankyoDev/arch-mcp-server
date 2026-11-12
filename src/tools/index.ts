@@ -40,6 +40,7 @@ import {
   pkgUpdateTool,
 } from './pkg.js';
 import { netLinkTool } from './netlink.js';
+import { dockerComposeTool, dockerInspectTool, dockerLogsTool, dockerPsTool } from './docker.js';
 import { aurInstallTool, aurSearchTool, pkgCleanTool, pkgFilesTool, pkgSyncTool } from './pkg-extra.js';
 import { kernelLogTool, modBlacklistTool, modInfoTool, modListTool, modLoadTool, modUnloadTool, sysctlGetTool, sysctlSetTool } from './kernel.js';
 import { fsMountTool, fsUmountTool } from './mounts.js';
@@ -131,6 +132,10 @@ export const allTools: readonly ToolDefinition[] = [
   netRouteTool,
   fwRuleTool,
   netLinkTool,
+  dockerPsTool,
+  dockerLogsTool,
+  dockerInspectTool,
+  dockerComposeTool,
   fsUsageTool,
   fsLsTool,
   fsFindTool,

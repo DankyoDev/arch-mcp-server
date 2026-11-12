@@ -10,7 +10,7 @@ export interface AuditEntry {
   tool: string;
   args: Record<string, unknown>;
   mode: string;
-  decision: 'allow' | 'deny' | 'confirm';
+  decision: 'allow' | 'deny' | 'confirm' | 'preview';
   confirmed: boolean;
   ms: number;
   exit: string;

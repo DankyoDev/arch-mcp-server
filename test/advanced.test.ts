@@ -11,6 +11,7 @@ import { fsMountTool } from '../src/tools/mounts.js';
 import { pkgCleanTool, pkgFilesTool } from '../src/tools/pkg-extra.js';
 import type { ToolContext } from '../src/tools/registry.js';
 import { usrListTool } from '../src/tools/users-extra.js';
+import { tokenOf } from './confirmation.js';
 
 type Reply = { stdout?: string; code?: number; stderr?: string };
 
@@ -50,11 +51,6 @@ function context(conn: Connection): ToolContext {
     config: loadConfig({ ARCH_MCP_HOST: 'test', ARCH_MCP_USER: 'dante' }),
     capabilities: async () => ok(capabilities),
   };
-}
-
-function tokenOf(result: { ok: boolean; error?: unknown }): string {
-  assert.equal(result.ok, false);
-  return (result as { error: { data: { token: string } } }).error.data.token;
 }
 
 beforeEach(() => resetConfirmations());

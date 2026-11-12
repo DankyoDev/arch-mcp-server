@@ -26,6 +26,8 @@ export interface RunOptions {
   timeoutMs?: number;
   maxBytes?: number;
   input?: string;
+  /** Native docker tools only: lets argv[0] be a container CLI (ADR-025). */
+  allowContainers?: boolean;
 }
 
 /** Run one argv vector remotely. Callers never pass a command string. */
@@ -41,7 +43,7 @@ export async function runCommand(
     return err('E_INTERNAL', 'invalid command arguments', error instanceof Error ? error.message : undefined);
   }
 
-  const denied = checkDenylist(argv);
+  const denied = checkDenylist(argv, { allowContainers: opts.allowContainers === true });
   if (denied !== null) return { ok: false, error: denied };
 
   let raw;

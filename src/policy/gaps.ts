@@ -18,6 +18,8 @@ export interface GapEntry {
   stdout_b: number;
   native: boolean;
   reason: string;
+  /** Binaries the script called, when the fallback was script_run. */
+  commands?: string[];
 }
 
 export interface GapSummary {
@@ -28,6 +30,8 @@ export interface GapSummary {
   hosts: string[];
   reasons: string[];
   examples: string[][];
+  /** `script_run` when the binary was detected inside an inline script. */
+  via?: string;
 }
 
 /** Record a fallback command locally and, if configured, on the central collector. */
@@ -62,34 +66,45 @@ export function readGaps(config: Config): GapEntry[] {
 export function summarizeGaps(entries: readonly GapEntry[], limit = 50): GapSummary[] {
   const groups = new Map<string, GapSummary & { hostSet: Set<string>; reasonSet: Set<string> }>();
   for (const entry of entries) {
-    const existing = groups.get(entry.binary);
-    if (existing === undefined) {
-      groups.set(entry.binary, {
-        binary: entry.binary,
-        count: 1,
-        first: entry.ts,
-        last: entry.ts,
-        hosts: [entry.host],
-        reasons: [entry.reason],
-        examples: [entry.argv],
-        hostSet: new Set([entry.host]),
-        reasonSet: new Set([entry.reason]),
-      });
-      continue;
-    }
-    existing.count += 1;
-    if (entry.ts < existing.first) existing.first = entry.ts;
-    if (entry.ts > existing.last) existing.last = entry.ts;
-    if (!existing.hostSet.has(entry.host)) {
-      existing.hostSet.add(entry.host);
-      existing.hosts.push(entry.host);
-    }
-    if (!existing.reasonSet.has(entry.reason)) {
-      existing.reasonSet.add(entry.reason);
-      existing.reasons.push(entry.reason);
-    }
-    if (existing.examples.length < 3 && !existing.examples.some((example) => sameArgv(example, entry.argv))) {
-      existing.examples.push(entry.argv);
+    // A script hides the binaries it calls; expand them so the promotion rule
+    // (ADR-021) sees "docker" instead of a single "script:bash" bucket.
+    const rows: Array<{ binary: string; via?: string }> =
+      entry.commands !== undefined && entry.commands.length > 0
+        ? entry.commands.map((command) => ({ binary: command, via: 'script_run' }))
+        : [{ binary: entry.binary }];
+    for (const row of rows) {
+      const key = `${row.via ?? ''}|${row.binary}`;
+      const existing = groups.get(key);
+      if (existing === undefined) {
+        const summary: GapSummary & { hostSet: Set<string>; reasonSet: Set<string> } = {
+          binary: row.binary,
+          count: 1,
+          first: entry.ts,
+          last: entry.ts,
+          hosts: [entry.host],
+          reasons: [entry.reason],
+          examples: [entry.argv],
+          hostSet: new Set([entry.host]),
+          reasonSet: new Set([entry.reason]),
+        };
+        if (row.via !== undefined) summary.via = row.via;
+        groups.set(key, summary);
+        continue;
+      }
+      existing.count += 1;
+      if (entry.ts < existing.first) existing.first = entry.ts;
+      if (entry.ts > existing.last) existing.last = entry.ts;
+      if (!existing.hostSet.has(entry.host)) {
+        existing.hostSet.add(entry.host);
+        existing.hosts.push(entry.host);
+      }
+      if (!existing.reasonSet.has(entry.reason)) {
+        existing.reasonSet.add(entry.reason);
+        existing.reasons.push(entry.reason);
+      }
+      if (existing.examples.length < 3 && !existing.examples.some((example) => sameArgv(example, entry.argv))) {
+        existing.examples.push(entry.argv);
+      }
     }
   }
   return [...groups.values()]

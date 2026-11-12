@@ -12,7 +12,7 @@ import {
   parseTimersJson,
   parseUnitsJson,
 } from '../parse/systemd.js';
-import { createConfirmation, consumeConfirmation } from '../policy/confirm.js';
+import { confirmationPayload, consumeConfirmation } from '../policy/confirm.js';
 import { defineTool, toolData } from './registry.js';
 import type { ToolContext } from './registry.js';
 
@@ -417,21 +417,27 @@ export const svcActionTool = defineTool({
       return err('E_POLICY', `${input.unit} is critical: its ${input.action} can lock you out`, 'do it from the console');
     }
     if (input.dry_run) {
-      return ok(toolData({ unit: input.unit, action: input.action, result: 'dry_run' }));
-    }
-    if (input.token === undefined) {
-      const confirmation = createConfirmation('svc_action', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: {
+      return ok(
+        toolData({
           unit: input.unit,
           action: input.action,
-          effect: `systemctl ${input.action} ${input.unit}`,
-        },
-      });
+          result: 'dry_run',
+          ...confirmationPayload('svc_action', input, ctx.config.confirmTtl),
+        }),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'svc_action', input as unknown as Record<string, unknown>);
+    if (input.token === undefined) {
+      return ok(
+        toolData(
+          confirmationPayload('svc_action', input, ctx.config.confirmTtl, {
+            unit: input.unit,
+            action: input.action,
+            effect: `systemctl ${input.action} ${input.unit}`,
+          }),
+        ),
+      );
+    }
+    const consumed = consumeConfirmation(input.token, 'svc_action', input);
     if (!consumed.ok) return consumed;
 
     const started = performance.now();
@@ -504,16 +510,19 @@ export const svcDaemonReloadTool = defineTool({
   },
   profiles: ['full'],
   handler: async (input, ctx) => {
-    if (input.dry_run) return ok(toolData({ result: 'dry_run' }));
-    if (input.token === undefined) {
-      const confirmation = createConfirmation('svc_daemon_reload', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: { effect: 'systemd re-reads unit files' },
-      });
+    if (input.dry_run) {
+      return ok(toolData({ result: 'dry_run', ...confirmationPayload('svc_daemon_reload', input, ctx.config.confirmTtl) }));
     }
-    const consumed = consumeConfirmation(input.token, 'svc_daemon_reload', input as unknown as Record<string, unknown>);
+    if (input.token === undefined) {
+      return ok(
+        toolData(
+          confirmationPayload('svc_daemon_reload', input, ctx.config.confirmTtl, {
+            effect: 'systemd re-reads unit files',
+          }),
+        ),
+      );
+    }
+    const consumed = consumeConfirmation(input.token, 'svc_daemon_reload', input);
     if (!consumed.ok) return consumed;
 
     const result = await runCommand(ctx.conn, ['systemctl', 'daemon-reload'], {

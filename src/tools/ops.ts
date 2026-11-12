@@ -1,8 +1,8 @@
-import { err, ok } from '../core/result.js';
+import { ok } from '../core/result.js';
 import type { AppError, Result } from '../core/types.js';
 import { runCommand } from '../exec/run.js';
 import type { CommandOutput } from '../exec/run.js';
-import { createConfirmation, consumeConfirmation } from '../policy/confirm.js';
+import { confirmationPayload, consumeConfirmation } from '../policy/confirm.js';
 import { toolData } from './registry.js';
 import type { ToolContext, ToolPayload } from './registry.js';
 
@@ -40,8 +40,8 @@ export async function runChecked(
 export function mapCommandError(stderr: string, fallback: string): AppError {
   const text = stderr.trim();
   const line = (text.split('\n')[0] ?? fallback).slice(0, 200);
-  if (/No such file|cannot stat|cannot remove|cannot open|not found/i.test(text)) {
-    return { code: 'E_NOTFOUND', message: line || fallback, hint: 'check the path' };
+  if (/no such (file|container|object|image|network|volume|service|project)|cannot stat|cannot remove|cannot open|not found/i.test(text)) {
+    return { code: 'E_NOTFOUND', message: line || fallback, hint: 'check the path or the name' };
   }
   if (/Permission denied|Operation not permitted|not permitted/i.test(text)) {
     return {
@@ -60,14 +60,13 @@ export async function confirmed(
   preview: Record<string, unknown>,
   run: () => Promise<Result<ToolPayload>>,
 ): Promise<Result<ToolPayload>> {
-  if (input.dry_run) return ok(toolData({ ...preview, result: 'dry_run' }));
+  if (input.dry_run) {
+    return ok(
+      toolData({ ...preview, result: 'dry_run', ...confirmationPayload(toolName, input, ctx.config.confirmTtl) }),
+    );
+  }
   if (input.token === undefined) {
-    const confirmation = createConfirmation(toolName, input, ctx.config.confirmTtl);
-    return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-      token: confirmation.token,
-      expires_in_s: confirmation.expiresInS,
-      preview,
-    });
+    return ok(toolData(confirmationPayload(toolName, input, ctx.config.confirmTtl, preview)));
   }
   const consumed = consumeConfirmation(input.token, toolName, input);
   if (!consumed.ok) return consumed;

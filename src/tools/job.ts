@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { err, ok } from '../core/result.js';
 import { jobArgv, jobStatus, killJob, startJob } from '../jobs.js';
 import type { JobCommand } from '../jobs.js';
-import { createConfirmation, consumeConfirmation } from '../policy/confirm.js';
+import { confirmationPayload, consumeConfirmation } from '../policy/confirm.js';
 import { defineTool, toolData } from './registry.js';
 
 const READ = {
@@ -40,17 +40,27 @@ export const jobStartTool = defineTool({
       return err('E_POLICY', 'job needs a valid target', 'btrfs_scrub requires /dev/<device>');
     }
     if (input.dry_run) {
-      return ok(toolData({ command: input.command, argv, result: 'dry_run' }));
+      return ok(
+        toolData({
+          command: input.command,
+          argv,
+          result: 'dry_run',
+          ...confirmationPayload('job_start', input, ctx.config.confirmTtl),
+        }),
+      );
     }
     if (input.token === undefined) {
-      const confirmation = createConfirmation('job_start', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: { command: input.command, argv, effect: 'runs in the background on the host' },
-      });
+      return ok(
+        toolData(
+          confirmationPayload('job_start', input, ctx.config.confirmTtl, {
+            command: input.command,
+            argv,
+            effect: 'runs in the background on the host',
+          }),
+        ),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'job_start', input as unknown as Record<string, unknown>);
+    const consumed = consumeConfirmation(input.token, 'job_start', input);
     if (!consumed.ok) return consumed;
 
     const started = await startJob(ctx.conn, ctx.config, input.command as JobCommand, input.target);
@@ -95,14 +105,16 @@ export const jobKillTool = defineTool({
   profiles: ['full'],
   handler: async (input, ctx) => {
     if (input.token === undefined) {
-      const confirmation = createConfirmation('job_kill', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: { job_id: input.job_id, effect: 'the job receives SIGTERM' },
-      });
+      return ok(
+        toolData(
+          confirmationPayload('job_kill', input, ctx.config.confirmTtl, {
+            job_id: input.job_id,
+            effect: 'the job receives SIGTERM',
+          }),
+        ),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'job_kill', input as unknown as Record<string, unknown>);
+    const consumed = consumeConfirmation(input.token, 'job_kill', input);
     if (!consumed.ok) return consumed;
     const killed = await killJob(ctx.conn, ctx.config, input.job_id);
     if (!killed.ok) return killed;

@@ -5,6 +5,7 @@ import { loadConfig } from '../src/config.js';
 import type { Connection, ExecOptions, RawExecResult } from '../src/connection/types.js';
 import { ok } from '../src/core/result.js';
 import { resetConfirmations } from '../src/policy/confirm.js';
+import { tokenOf } from './confirmation.js';
 import type { ToolContext } from '../src/tools/registry.js';
 import { cronListTool, cronRemoveTool, cronWriteTool, parseCrontab } from '../src/tools/cron.js';
 
@@ -48,12 +49,6 @@ function context(conn: Connection): ToolContext {
     config: loadConfig({ ARCH_MCP_HOST: 'test', ARCH_MCP_USER: 'dante' }),
     capabilities: async () => ok(capabilities),
   };
-}
-
-function tokenOf(result: Awaited<ReturnType<typeof cronWriteTool.handler>>): string {
-  assert.equal(result.ok, false);
-  if (result.ok) throw new Error('expected confirmation');
-  return (result.error.data as { token: string }).token;
 }
 
 const crontab = '# m h dom mon dow command\n0 3 * * * /usr/bin/backup.sh\n*/5 * * * * echo hi\nMAILTO=root\n';

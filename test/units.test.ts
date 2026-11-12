@@ -5,6 +5,7 @@ import { loadConfig } from '../src/config.js';
 import type { Connection, ExecOptions, RawExecResult } from '../src/connection/types.js';
 import { ok } from '../src/core/result.js';
 import { resetConfirmations } from '../src/policy/confirm.js';
+import { tokenOf } from './confirmation.js';
 import type { ToolContext } from '../src/tools/registry.js';
 import { svcUnitDeleteTool, svcUnitWriteTool } from '../src/tools/units.js';
 
@@ -46,12 +47,6 @@ function context(conn: Connection): ToolContext {
     config: loadConfig({ ARCH_MCP_HOST: 'test', ARCH_MCP_USER: 'root' }),
     capabilities: async () => ok(capabilities),
   };
-}
-
-function tokenOf(result: Awaited<ReturnType<typeof svcUnitWriteTool.handler>>): string {
-  assert.equal(result.ok, false);
-  if (result.ok) throw new Error('expected confirmation');
-  return (result.error.data as { token: string }).token;
 }
 
 const unit = 'arch-mcp-test.service';

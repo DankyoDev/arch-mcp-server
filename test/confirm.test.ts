@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { beforeEach, describe, it } from 'node:test';
 import {
   argsFingerprint,
+  confirmationPayload,
   consumeConfirmation,
   createConfirmation,
   pendingCount,
@@ -70,5 +71,31 @@ describe('confirmations', () => {
       argsFingerprint({ pid: 1, signal: 'HUP' }),
       argsFingerprint({ signal: 'HUP', pid: 1, token: 'abc12345' }),
     );
+  });
+
+  it('ignores dry_run so a preview token authorizes the real call', () => {
+    const args = { path: '/tmp/x', content: 'hello\n' };
+    assert.equal(argsFingerprint({ ...args, dry_run: true }), argsFingerprint({ ...args, dry_run: false }));
+  });
+
+  it('ignores line endings and trailing whitespace in scripts', () => {
+    const a = argsFingerprint({ language: 'bash', source: 'docker ps   \r\n\r\n' });
+    const b = argsFingerprint({ language: 'bash', source: 'docker ps' });
+    assert.equal(a, b);
+  });
+
+  it('still tells apart scripts that differ inside a line', () => {
+    const a = argsFingerprint({ source: 'echo a b' });
+    const b = argsFingerprint({ source: 'echo a  b' });
+    assert.notEqual(a, b);
+  });
+
+  it('issues the confirmation payload as a success-shaped object', () => {
+    const payload = confirmationPayload('svc_action', { unit: 'nginx.service' }, 120, { effect: 'restart' });
+    assert.equal(payload.confirm_required, true);
+    assert.match(payload.token, /^[0-9a-f]{8}$/);
+    assert.equal(payload.expires_in_s, 120);
+    assert.deepEqual(payload.preview, { effect: 'restart' });
+    assert.equal(consumeConfirmation(payload.token, 'svc_action', { unit: 'nginx.service' }).ok, true);
   });
 });

@@ -5,10 +5,10 @@ import { toolsForProfile } from '../src/tools/registry.js';
 
 describe('profiles', () => {
   it('keeps the documented tool counts', () => {
-    assert.equal(allTools.length, 109);
+    assert.equal(allTools.length, 113);
     assert.equal(toolsForProfile(allTools, 'core').length, 12);
-    assert.equal(toolsForProfile(allTools, 'readonly').length, 63);
-    assert.equal(toolsForProfile(allTools, 'full').length, 109);
+    assert.equal(toolsForProfile(allTools, 'readonly').length, 66);
+    assert.equal(toolsForProfile(allTools, 'full').length, 113);
   });
 
   it('keeps exec_gaps and fs_grep read-only', () => {

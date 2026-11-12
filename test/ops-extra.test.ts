@@ -5,6 +5,7 @@ import { loadConfig } from '../src/config.js';
 import type { Connection, ExecOptions, RawExecResult } from '../src/connection/types.js';
 import { ok } from '../src/core/result.js';
 import { resetConfirmations } from '../src/policy/confirm.js';
+import { tokenOf } from './confirmation.js';
 import { usrPasswordTool } from '../src/tools/password.js';
 import type { ToolContext } from '../src/tools/registry.js';
 import { svcTimerSetTool } from '../src/tools/timers.js';
@@ -50,11 +51,6 @@ function context(conn: Connection): ToolContext {
     config: loadConfig({ ARCH_MCP_HOST: 'test', ARCH_MCP_USER: 'dante' }),
     capabilities: async () => ok(capabilities),
   };
-}
-
-function tokenOf(result: { ok: boolean; error?: unknown }): string {
-  assert.equal(result.ok, false);
-  return ((result as { error: { data: { token: string } } }).error.data.token);
 }
 
 beforeEach(() => resetConfirmations());

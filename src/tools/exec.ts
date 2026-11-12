@@ -3,9 +3,10 @@ import { basename } from 'node:path';
 import { z } from 'zod';
 import { err, ok } from '../core/result.js';
 import { runCommand } from '../exec/run.js';
-import { createConfirmation, consumeConfirmation } from '../policy/confirm.js';
+import { confirmationPayload, consumeConfirmation } from '../policy/confirm.js';
 import { checkDenylist } from '../policy/denylist.js';
 import { readGaps, recordGap, summarizeGaps } from '../policy/gaps.js';
+import { detectCommands } from '../parse/script.js';
 import { defineTool, toolData } from './registry.js';
 import type { ToolContext } from './registry.js';
 import { validateAbsolutePath } from './guards.js';
@@ -129,6 +130,9 @@ const EXEC_ANY_BLOCKED = new Set([
 const SCRIPT_LANGUAGES = ['python', 'bash', 'sh', 'node', 'perl', 'ruby'] as const;
 type ScriptLanguage = (typeof SCRIPT_LANGUAGES)[number];
 
+/** Languages where the first word of a line is a binary worth reporting. */
+const SHELL_LANGUAGES = new Set<ScriptLanguage>(['bash', 'sh']);
+
 const SCRIPT_INTERPRETER: Record<ScriptLanguage, string> = {
   python: 'python3',
   bash: 'bash',
@@ -209,14 +213,11 @@ export const execTool = defineTool({
       return ok(toolData({ ...preview(normalized.argv, input.timeout_ms), result: 'dry_run' }));
     }
     if (input.token === undefined) {
-      const confirmation = createConfirmation('exec', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: preview(normalized.argv, input.timeout_ms),
-      });
+      return ok(
+        toolData(confirmationPayload('exec', input, ctx.config.confirmTtl, preview(normalized.argv, input.timeout_ms))),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'exec', input as unknown as Record<string, unknown>);
+    const consumed = consumeConfirmation(input.token, 'exec', input);
     if (!consumed.ok) return consumed;
 
     const started = performance.now();
@@ -281,14 +282,11 @@ export const execAnyTool = defineTool({
       return ok(toolData({ ...preview(normalized.argv, input.timeout_ms), result: 'dry_run' }));
     }
     if (input.token === undefined) {
-      const confirmation = createConfirmation('exec_any', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: preview(normalized.argv, input.timeout_ms),
-      });
+      return ok(
+        toolData(confirmationPayload('exec_any', input, ctx.config.confirmTtl, preview(normalized.argv, input.timeout_ms))),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'exec_any', input as unknown as Record<string, unknown>);
+    const consumed = consumeConfirmation(input.token, 'exec_any', input);
     if (!consumed.ok) return consumed;
 
     const started = performance.now();
@@ -351,24 +349,25 @@ export const scriptRunTool = defineTool({
       if (!path.ok) return path;
     }
     const interpreter = SCRIPT_INTERPRETER[input.language];
+    const commands = SHELL_LANGUAGES.has(input.language) ? detectCommands(input.source) : [];
     const previewData = {
       interpreter,
       source_bytes: input.source === undefined ? 0 : Buffer.byteLength(input.source),
       path: input.path ?? null,
       args: input.args,
       keep: input.keep,
+      commands,
       effect: 'writes the script to /tmp and executes it as the SSH user',
     };
-    if (input.dry_run) return ok(toolData({ ...previewData, result: 'dry_run' }));
-    if (input.token === undefined) {
-      const confirmation = createConfirmation('script_run', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: previewData,
-      });
+    if (input.dry_run) {
+      return ok(
+        toolData({ ...previewData, result: 'dry_run', ...confirmationPayload('script_run', input, ctx.config.confirmTtl) }),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'script_run', input as unknown as Record<string, unknown>);
+    if (input.token === undefined) {
+      return ok(toolData(confirmationPayload('script_run', input, ctx.config.confirmTtl, previewData)));
+    }
+    const consumed = consumeConfirmation(input.token, 'script_run', input);
     if (!consumed.ok) return consumed;
 
     let scriptPath = input.path;
@@ -408,6 +407,7 @@ export const scriptRunTool = defineTool({
       stdout_b: result.ok ? Buffer.byteLength(result.data.stdout) : 0,
       native: false,
       reason: 'script_run',
+      commands,
     });
     if (!result.ok) return result;
     return ok(

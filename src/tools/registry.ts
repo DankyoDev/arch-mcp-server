@@ -167,7 +167,7 @@ export function registerTool(server: McpServer, definition: ToolDefinition, ctx:
       tool: definition.name,
       args: rawArgs,
       mode: ctx.config.mode,
-      decision: outcome.ok ? 'allow' : outcome.error.code === 'E_CONFIRM' ? 'confirm' : 'deny',
+      decision: classifyOutcome(outcome),
       confirmed: rawArgs.token !== undefined,
       ms: elapsed(),
       exit: outcome.ok ? 'OK' : outcome.error.code,
@@ -186,6 +186,20 @@ export function registerTool(server: McpServer, definition: ToolDefinition, ctx:
     },
     handler,
   );
+}
+
+/**
+ * Audit vocabulary: a mutation that only asks for a token is `confirm`, a
+ * dry run is `preview`, and `allow` is reserved for calls that really ran
+ * (ADR-024). Before this, a preview and a real execution looked the same.
+ */
+export function classifyOutcome(outcome: Result<ToolPayload>): 'allow' | 'deny' | 'confirm' | 'preview' {
+  if (!outcome.ok) return 'deny';
+  const data = outcome.data.data;
+  if (typeof data !== 'object' || data === null) return 'allow';
+  const record = data as { confirm_required?: unknown; result?: unknown };
+  if (record.confirm_required !== true) return 'allow';
+  return record.result === 'dry_run' ? 'preview' : 'confirm';
 }
 
 function toCallResult(envelope: unknown): CallToolResult {

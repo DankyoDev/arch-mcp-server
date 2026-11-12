@@ -5,6 +5,7 @@ import { loadConfig } from '../src/config.js';
 import type { Connection, ExecOptions, RawExecResult } from '../src/connection/types.js';
 import { ok } from '../src/core/result.js';
 import { resetConfirmations } from '../src/policy/confirm.js';
+import { tokenOf } from './confirmation.js';
 import type { ToolContext } from '../src/tools/registry.js';
 import { netLinkTool } from '../src/tools/netlink.js';
 
@@ -57,12 +58,6 @@ const links = JSON.stringify([
 function responder(line: string): Reply {
   if (line.endsWith('ip -j link show')) return { stdout: links };
   return {};
-}
-
-function tokenOf(result: Awaited<ReturnType<typeof netLinkTool.handler>>): string {
-  assert.equal(result.ok, false);
-  if (result.ok) throw new Error('expected confirmation');
-  return (result.error.data as { token: string }).token;
 }
 
 beforeEach(() => resetConfirmations());

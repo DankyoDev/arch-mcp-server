@@ -27,7 +27,7 @@ import {
   fsSymlinkTool,
 } from '../src/tools/fsops.js';
 import type { ToolContext } from '../src/tools/registry.js';
-
+import { needsConfirmation, tokenOf } from './confirmation.js';
 interface Reply {
   stdout: string;
   code?: number;
@@ -75,13 +75,6 @@ function context(
   };
 }
 
-function tokenOf(result: Awaited<ReturnType<typeof fsMkdirTool.handler>>): string {
-  assert.equal(result.ok, false);
-  if (result.ok) throw new Error('expected E_CONFIRM');
-  assert.equal(result.error.code, 'E_CONFIRM');
-  return (result.error.data as { token: string }).token;
-}
-
 const base = { dry_run: false, token: undefined };
 
 beforeEach(() => {
@@ -94,9 +87,7 @@ describe('fs_mkdir', () => {
     const ctx = context(conn);
     const input = { path: '/tmp/demo', mode: '750', parents: true, ...base };
     const first = await fsMkdirTool.handler(input, ctx);
-    assert.equal(first.ok, false);
-    if (first.ok) return;
-    assert.equal(first.error.code, 'E_CONFIRM');
+    assert.equal(needsConfirmation(first), true);
     const second = await fsMkdirTool.handler({ ...input, token: tokenOf(first) }, ctx);
     assert.equal(second.ok, true);
     assert.ok(conn.calls[0]?.includes('mkdir -p -m 750 /tmp/demo'));

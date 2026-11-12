@@ -15,7 +15,7 @@ import {
   PSEUDO_FSTYPES,
 } from '../parse/fs.js';
 import { parseSmartctlJson } from '../parse/hw.js';
-import { createConfirmation, consumeConfirmation } from '../policy/confirm.js';
+import { confirmationPayload, consumeConfirmation } from '../policy/confirm.js';
 import { defineTool, toolData } from './registry.js';
 import { requireFeature, validateAbsolutePath } from './guards.js';
 import { isForbiddenWrite, isSensitivePath } from './paths.js';
@@ -342,17 +342,29 @@ export const fsWriteTool = defineTool({
     }
     const bytes = Buffer.byteLength(input.content, 'utf8');
     if (input.dry_run) {
-      return ok(toolData({ path: path.data, bytes, mode: input.mode, result: 'dry_run' }));
+      return ok(
+        toolData({
+          path: path.data,
+          bytes,
+          mode: input.mode,
+          result: 'dry_run',
+          ...confirmationPayload('fs_write', input, ctx.config.confirmTtl),
+        }),
+      );
     }
     if (input.token === undefined) {
-      const confirmation = createConfirmation('fs_write', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: { path: path.data, bytes, mode: input.mode ?? null, effect: 'overwrites the file' },
-      });
+      return ok(
+        toolData(
+          confirmationPayload('fs_write', input, ctx.config.confirmTtl, {
+            path: path.data,
+            bytes,
+            mode: input.mode ?? null,
+            effect: 'overwrites the file',
+          }),
+        ),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'fs_write', input as unknown as Record<string, unknown>);
+    const consumed = consumeConfirmation(input.token, 'fs_write', input);
     if (!consumed.ok) return consumed;
 
     const written = await runCommand(ctx.conn, ['sh', '-c', 'cat > "$1"', '_', path.data], {

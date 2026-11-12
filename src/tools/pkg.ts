@@ -13,7 +13,7 @@ import {
 } from '../parse/pacman.js';
 import { defineTool, toolData } from './registry.js';
 import { requireFeature } from './guards.js';
-import { createConfirmation, consumeConfirmation } from '../policy/confirm.js';
+import { confirmationPayload, consumeConfirmation } from '../policy/confirm.js';
 
 const READ = {
   readOnlyHint: true,
@@ -251,18 +251,21 @@ export const pkgUpdateTool = defineTool({
       });
       if (!result.ok) return result;
       const updates = parsePacmanQu(result.data.stdout);
-      return ok(toolData({ updates: updates.length, packages: updates.slice(0, 50) }));
+      return ok(
+        toolData({
+          updates: updates.length,
+          packages: updates.slice(0, 50),
+          ...confirmationPayload('pkg_update', input, ctx.config.confirmTtl),
+        }),
+      );
     }
 
     if (input.token === undefined) {
-      const confirmation = createConfirmation('pkg_update', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat with dry_run=false and token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: { effect: 'pacman -Syu --noconfirm' },
-      });
+      return ok(
+        toolData(confirmationPayload('pkg_update', input, ctx.config.confirmTtl, { effect: 'pacman -Syu --noconfirm' })),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'pkg_update', input as unknown as Record<string, unknown>);
+    const consumed = consumeConfirmation(input.token, 'pkg_update', input);
     if (!consumed.ok) return consumed;
 
     const started = performance.now();
@@ -299,16 +302,22 @@ export const pkgInstallTool = defineTool({
     if (!guard.ok) return guard;
 
     const argv = ['pacman', '-S', '--needed', '--noconfirm', ...input.names];
-    if (input.dry_run) return ok(toolData({ argv, result: 'dry_run' }));
-    if (input.token === undefined) {
-      const confirmation = createConfirmation('pkg_install', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: { names: input.names, effect: 'installs packages and dependencies' },
-      });
+    if (input.dry_run) {
+      return ok(
+        toolData({ argv, result: 'dry_run', ...confirmationPayload('pkg_install', input, ctx.config.confirmTtl) }),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'pkg_install', input as unknown as Record<string, unknown>);
+    if (input.token === undefined) {
+      return ok(
+        toolData(
+          confirmationPayload('pkg_install', input, ctx.config.confirmTtl, {
+            names: input.names,
+            effect: 'installs packages and dependencies',
+          }),
+        ),
+      );
+    }
+    const consumed = consumeConfirmation(input.token, 'pkg_install', input);
     if (!consumed.ok) return consumed;
 
     const started = performance.now();
@@ -338,16 +347,22 @@ export const pkgRemoveTool = defineTool({
     if (!guard.ok) return guard;
 
     const argv = ['pacman', '-R', '--noconfirm', ...input.names];
-    if (input.dry_run) return ok(toolData({ argv, result: 'dry_run' }));
-    if (input.token === undefined) {
-      const confirmation = createConfirmation('pkg_remove', input as unknown as Record<string, unknown>, ctx.config.confirmTtl);
-      return err('E_CONFIRM', 'confirmation required', 'repeat the call with token', {
-        token: confirmation.token,
-        expires_in_s: confirmation.expiresInS,
-        preview: { names: input.names, effect: 'removes the packages only' },
-      });
+    if (input.dry_run) {
+      return ok(
+        toolData({ argv, result: 'dry_run', ...confirmationPayload('pkg_remove', input, ctx.config.confirmTtl) }),
+      );
     }
-    const consumed = consumeConfirmation(input.token, 'pkg_remove', input as unknown as Record<string, unknown>);
+    if (input.token === undefined) {
+      return ok(
+        toolData(
+          confirmationPayload('pkg_remove', input, ctx.config.confirmTtl, {
+            names: input.names,
+            effect: 'removes the packages only',
+          }),
+        ),
+      );
+    }
+    const consumed = consumeConfirmation(input.token, 'pkg_remove', input);
     if (!consumed.ok) return consumed;
 
     const result = await runCommand(ctx.conn, argv, { timeoutMs: PKG_TIMEOUT_MS, maxBytes: 32_768 });

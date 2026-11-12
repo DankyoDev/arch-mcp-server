@@ -6,6 +6,7 @@ import { describe, it } from 'node:test';
 import { loadConfig } from '../src/config.js';
 import { audit, redact } from '../src/policy/audit.js';
 import { RateLimiter } from '../src/policy/rate.js';
+import { classifyOutcome } from '../src/tools/registry.js';
 
 describe('redact', () => {
   it('hides secret-looking keys at any depth', () => {
@@ -63,8 +64,25 @@ describe('audit', () => {
   });
 });
 
-describe('RateLimiter', () => {
-  it('allows up to the limit inside the window', () => {
+describe('audit decisions', () => {
+  it('separates preview, confirm, allow and deny', () => {
+    assert.equal(
+      classifyOutcome({ ok: false, error: { code: 'E_POLICY', message: 'no' } }),
+      'deny',
+    );
+    assert.equal(
+      classifyOutcome({ ok: true, data: { data: { confirm_required: true, token: 'abc' } } }),
+      'confirm',
+    );
+    assert.equal(
+      classifyOutcome({ ok: true, data: { data: { confirm_required: true, result: 'dry_run', token: 'abc' } } }),
+      'preview',
+    );
+    assert.equal(classifyOutcome({ ok: true, data: { data: { units: [] } } }), 'allow');
+  });
+});
+
+describe('RateLimiter', () => {  it('allows up to the limit inside the window', () => {
     const limiter = new RateLimiter(2);
     assert.equal(limiter.take().ok, true);
     assert.equal(limiter.take().ok, true);
