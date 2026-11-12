@@ -1,0 +1,44 @@
+name: arch-mcp-test
+
+# Dos entornos desechables para el proyecto arch-mcp-server.
+#  - arch-ssh:      sshd como PID 1 (sin systemd). Prueba el transporte SSH y los parsers.
+#  - arch-systemd:  systemd real como PID 1. Prueba systemctl/timers/sockets.
+# Locales, sin datos persistentes. Se destruyen con `docker compose down -v`.
+#
+# La clave se copia con permisos 0600 dentro del contenedor: un bind mount de
+# Windows llega como 0777 y sshd la rechaza.
+
+services:
+  arch-ssh:
+    build: .
+    image: arch-mcp-test:local
+    container_name: arch-ssh
+    command:
+      - sh
+      - -c
+      - install -m 600 /keys/id_test.pub /root/.ssh/authorized_keys && mkdir -p /run/sshd && exec /usr/sbin/sshd -D -e
+    ports:
+      - "127.0.0.1:2222:22"
+    volumes:
+      - ./ssh/id_test.pub:/keys/id_test.pub:ro
+    restart: "no"
+
+  arch-systemd:
+    image: arch-mcp-test:local
+    container_name: arch-systemd
+    command:
+      - /bin/sh
+      - -c
+      - install -m 600 /keys/id_test.pub /root/.ssh/authorized_keys; exec /usr/lib/systemd/systemd
+    ports:
+      - "127.0.0.1:2223:22"
+    # Aislado dentro de la VM de Docker Desktop. Nunca usar cgroupns=host.
+    privileged: true
+    cgroup: private
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - ./ssh/id_test.pub:/keys/id_test.pub:ro
+    restart: "no"
