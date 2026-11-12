@@ -211,8 +211,8 @@ the work without an MCP; it is not what the catalog takes up in context. A full 
 | Profile | Tools | Definitions | Name + description |
 |---|---:|---:|---:|
 | `core` (default) | 12 | 8 648 B ≈ 2 200 tokens | 1 982 B ≈ 500 tokens |
-| `readonly` | 63 | 38 267 B ≈ 9 600 tokens | 9 080 B ≈ 2 300 tokens |
-| `full` | 109 | 80 042 B ≈ 20 000 tokens | 16 012 B ≈ 4 000 tokens |
+| `readonly` | 66 | 40 705 B ≈ 10 200 tokens | 9 626 B ≈ 2 400 tokens |
+| `full` | 113 | 83 958 B ≈ 21 000 tokens | 16 781 B ≈ 4 200 tokens |
 
 These are `bytes/4` estimates; a real tokenizer gives 20-30% more in the worst case. With Code
 Mode the definitions are loaded on demand; without it, `core` keeps the fixed cost at ~2k
@@ -239,7 +239,7 @@ queries.
 - `pnpm lint` -> `tsc --noEmit` (there is no eslint, the type is the linter).
 - No CI that touches the real host.
 
-Current implementation: `pnpm test` runs 313 tests without network; `pnpm measure` is the eval
+Current implementation: `pnpm test` runs 337 tests without network; `pnpm measure` is the eval
 against a host (dev or real in readonly) and does not run in CI. `pnpm audit:tools` calls the 101
 audit entries (all the tools with `dry_run` in mutations) against a host and
 fails if any of them returns an unexpected error.

@@ -1,6 +1,6 @@
 {
   "name": "arch-mcp-server",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "MCP server for Linux host administration over SSH, with first-class Arch Linux support",
   "type": "module",
   "bin": {

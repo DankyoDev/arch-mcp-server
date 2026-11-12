@@ -14,7 +14,7 @@ This is not an `ssh` wrapper. It is a layer of **tasks**: every tool returns com
 actionable JSON, and every response is measured in bytes so it does not burn context.
 
 ```
-status:  complete implementation, 109 tools, v0.6.1
+status:  complete implementation, 113 tools, v0.7.0
 docs:    ./docs
 ```
 
@@ -66,7 +66,7 @@ You can also pack and install it locally:
 
 ```bash
 pnpm pack
-npm i -g ./arch-mcp-server-0.6.1.tgz
+npm i -g ./arch-mcp-server-0.7.0.tgz
 arch-mcp
 ```
 
@@ -142,8 +142,8 @@ The SSH user needs NOPASSWD sudoers rules. Every other variable is documented in
 | Profile | Tools | Use |
 |---|---:|---|
 | `core` (default) | 12 | 90% of everyday diagnosis |
-| `readonly` | 63 | full diagnosis without mutations |
-| `full` | 109 | everything, including writes, jobs, daily operations, fallback and `raw_exec` |
+| `readonly` | 66 | full diagnosis without mutations |
+| `full` | 113 | everything, including writes, jobs, daily operations, fallback and `raw_exec` |
 
 `ARCH_MCP_PROFILE` selects the profile. With Code Mode the definitions load on demand, so a
 large catalog does not inflate the context.
@@ -151,10 +151,12 @@ large catalog does not inflate the context.
 ## Security (summary)
 
 - **Readonly by default.** Mutations require `ARCH_MCP_MODE=write` plus a two-step
-  confirmation token (TTL, single use, bound to the tool and its arguments).
+  confirmation token (TTL, single use, bound to the tool and its arguments). A call that asks
+  for the token is a **success** with `confirm_required: true`, not an error, and nothing runs.
 - **Process denylist** before execution: `rm -rf /`, `mkfs`, `dd of=/dev/`, `--privileged`,
   `--cgroupns=host`, `--pid=host`, `--net=host`, `reboot`, critical units (`sshd`, `dbus`,
-  `systemd-*`), and writes to `/etc/passwd`, `/etc/sudoers` or SSH keys.
+  `systemd-*`), and writes to `/etc/passwd`, `/etc/sudoers` or SSH keys. Container CLIs are
+  reachable only through the `docker_*` tools, never through `exec` or `exec_any`.
 - **No interpolation**: every command is argv quoted with `shellQuote()`; `fs_write` content
   travels over stdin.
 - **JSONL audit** with rotation at `~/.local/state/arch-mcp/audit.jsonl`; tokens and file
@@ -177,14 +179,24 @@ Three layers, from cheapest to most powerful:
 3. **`exec_any` / `script_run`**: admin mode and opt-in. `exec_any` rejects shells and
    interpreters; `script_run` runs python/bash/node/perl/ruby inline or an existing script.
 
+Both `exec`, `exec_any` and `script_run` answer in two steps, and the preview already carries
+the token: a call without `token` returns `confirm_required: true` plus the `token`, and the
+same call with that token runs once. A `dry_run` returns the preview **and** a token for the
+real call, so an agent never needs a third round trip.
+
 Every fallback call is recorded in `~/.local/state/arch-mcp/gaps.jsonl`, and `exec_gaps`
-groups it by binary. `gap_report` records commands the agent ran outside the MCP. If
+groups it by binary. For `script_run` the log also carries the binaries the script called, so
+a script that keeps invoking `docker` or `jq` shows up as that binary instead of a single
+`script:bash` row. `gap_report` records commands the agent ran outside the MCP. If
 `ARCH_MCP_GAP_ENDPOINT` is set, reports are sent to a collector (`scripts/gap-receiver.mjs`).
 The rule: a binary that keeps showing up in `exec_gaps` becomes a native tool or a parsed
-recipe.
+recipe. That is how the `docker_*` tools ended up in the catalog.
 
 ### Daily operations
 
+- **Containers:** `docker_ps`, `docker_logs`, `docker_inspect` and `docker_compose`
+  (`up -d`, `down`, `restart`, `stop`, `pull`). The compose file is detected from the project
+  directory, the file name is validated, and environment values and labels are never returned.
 - **Files:** `fs_mkdir`, `fs_copy`, `fs_move`, `fs_remove`, `fs_chmod`, `fs_chown`,
   `fs_symlink`. All with `dry_run` and confirmation; `fs_remove` refuses `/`, `/etc`, `/usr`,
   `/home`...
@@ -225,7 +237,7 @@ behind a proxy. See `docs/11-configuration.md` §9.
 ## Development
 
 ```bash
-pnpm test        # 313 unit tests, no network
+pnpm test        # 337 unit tests, no network
 pnpm audit:tools # every tool against a host (mutations in dry_run)
 pnpm measure     # 20 evals against a host (ARCH_MCP_*), measures tokens
 pnpm fixtures    # recapture fixtures from the dev container

@@ -25,8 +25,8 @@ Error:
   "ok": false,
   "error": {
     "code": "E_POLICY",
-    "message": "container tools are out of scope for this MCP",
-    "hint": "use the homelab MCP; the 2026-11-12 incident came from docker run --privileged",
+    "message": "container CLIs are not available through exec",
+    "hint": "use docker_ps, docker_logs, docker_inspect or docker_compose",
     "data": { "rule": "containers" }
   },
   "meta": { "host": "dante", "ms": 0 }
@@ -41,6 +41,31 @@ Rules:
 - Errors are returned with `isError: true` in the MCP result.
 - In MCP, **`structuredContent` with this object** is sent plus the same JSON as text
   (compatibility with old clients).
+
+### Confirmation is not an error
+
+A mutation without its token answers `ok: true` and runs nothing:
+
+```json
+{
+  "ok": true,
+  "data": {
+    "confirm_required": true,
+    "token": "362fa67f",
+    "expires_in_s": 120,
+    "preview": { "unit": "nginx.service", "action": "restart", "effect": "systemctl restart nginx.service" }
+  },
+  "meta": { "host": "dante", "ms": 1, "truncated": false }
+}
+```
+
+- Repeating the same call with `token` runs it once.
+- `dry_run: true` returns the preview **and** a token, so preview plus apply is two calls.
+- The token is bound to the tool and its arguments. `token` and `dry_run` are excluded from
+  that fingerprint, and trailing whitespace, line endings and edge blank lines in `source`
+  and `content` are ignored, so re-emitting the same script does not invalidate it.
+- `E_CONFIRM` (with `isError: true`) means the token was unknown, expired, already used or
+  bound to other arguments. `confirm_required` means "send this token back".
 
 ## 2. Types and units
 

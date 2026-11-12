@@ -67,7 +67,8 @@ tests.
 **Decision:** ephemeral token returned by the server after a `preview`.
 
 **Consequences:** one extra call on destructive operations; in exchange, the human sees the
-effect and the audit records the confirmation.
+effect and the audit records the confirmation. The token request itself is a success, not an
+error (ADR-024), and the token is bound to the tool and its arguments.
 
 ---
 
@@ -75,7 +76,7 @@ effect and the audit records the confirmation.
 
 **Context:** clients without Code Mode load every definition.
 
-**Decision:** `core` (12), `readonly` (46), `full` (56) via `ARCH_MCP_PROFILE`.
+**Decision:** `core` (12), `readonly` (66), `full` (113) via `ARCH_MCP_PROFILE`.
 
 **Consequences:** the profile membership of each tool has to be maintained.
 
@@ -91,14 +92,17 @@ effect and the audit records the confirmation.
 
 ---
 
-## ADR-009 - No Docker in this MCP
+## ADR-009 - No container management at first
 
-**Context:** the homelab has 12 Compose projects; mixing it in inflates the catalog and the
-risk.
+**Context:** the first deployment ran a dozen Compose projects. Adding containers to the
+catalog before the confirmation, audit and denylist work existed would have widened the blast
+radius without any guard.
 
-**Decision:** out of scope. It lives in the homelab MCP.
+**Decision:** containers were out of scope; `docker` went on the denylist.
 
-**Consequences:** `docker` is on the `raw_exec` denylist.
+**Consequences:** every container operation fell to the fallback layer. Measured later: eight
+`script_run` calls and eight confirmation round trips to bring up one project. **Superseded by
+ADR-025.**
 
 ---
 
@@ -258,7 +262,7 @@ the token travels in clear text if HTTP is used without TLS.
 
 ## ADR-021 - Execution layers and gap logging
 
-**Context:** the catalog of 56 tools covers common diagnosis and management, but Linux has
+**Context:** the catalog covers common diagnosis and management, but Linux has
 thousands of binaries and any external application (croc, ffmpeg, a script of your own) adds
 more. An agent gets stuck as soon as it needs something that is not a native tool. On top of
 that, `raw_exec` required admin and a fixed allowlist, so it was no good as a daily fallback
@@ -329,3 +333,80 @@ NOPASSWD; if it is missing, `runCommand` returns `E_PERM` with a hint.
 passwords, but the user needs sudoers. The denylist still applies to the real argv before
 wrapping it, and `sudo` is still forbidden as a binary for `exec`/`exec_any`/`raw_exec`.
 Elevation is a configuration decision, not a tool the model can invoke freely.
+
+---
+
+## ADR-024 - Confirmation requests are not errors
+
+**Context:** a real session brought up one Compose project with 23 tool calls: four
+executions and eight `E_CONFIRM` responses. The token was invalidated twice because the agent
+re-emitted the same script with different trailing whitespace between the two calls, and the
+client read `isError: true` as "the call failed", so it kept rewriting the arguments instead of
+confirming them.
+
+**Decision:** three changes to the same mechanism.
+
+1. Asking for a token is a **success**: `ok: true`, `data.confirm_required`, `token`,
+   `expires_in_s` and `preview`. `E_CONFIRM` is reserved for a token that is unknown,
+   expired, already used or bound to other arguments.
+2. The fingerprint drops `token` and `dry_run`, and ignores CRLF, trailing whitespace per line
+   and edge blank lines in `source` and `content`. Internal spacing still counts.
+3. `dry_run` returns the preview **and** a token for the real call.
+
+**Consequences:** preview plus apply is two calls instead of three. The audit can tell a
+preview from an execution (`preview` vs `allow`). A client that keys off
+`error.code === 'E_CONFIRM'` must switch to `data.confirm_required`; this is a breaking
+response change, hence 0.7.0.
+
+---
+
+## ADR-025 - Native container tools
+
+**Context:** ADR-009 kept containers out of the catalog. The measurement in ADR-009's
+consequences shows the cost: one Compose project, eight `script_run` calls, raw text output
+and a gap log that could not say which binary was missing. That is exactly the promotion rule
+of ADR-021 firing.
+
+**Decision:** four tools. `docker_ps`, `docker_logs` and `docker_inspect` are read-only;
+`docker_compose` runs `up -d`, `down`, `restart`, `stop` and `pull` in the `full` profile with
+a token. The Compose file is detected from the project directory in one round trip, the file
+name and the service names are validated, and the argv is fixed: no shell, no string
+interpolation. Labels and environment values are never returned.
+
+**Consequences:** `docker` stays forbidden for `exec`, `exec_any` and `raw_exec`. The
+`containers` denylist rule gains an internal `allowContainers` flag that only these tools set,
+and `container-flags` (`--privileged`, `--pid=host`, ...) keeps applying to everything.
+`docker_compose` acts on a compose file that may declare `privileged: true`, which is why it
+requires admin mode and a token, and why the documentation says so.
+
+---
+
+## ADR-026 - The gap log understands scripts
+
+**Context:** consecutive `script_run` entries were all `script:bash` with argv
+`["bash", "<temp>"]`. The promotion rule of ADR-021 wants "a binary that shows up several
+times becomes a tool", but the log hid the binary, so Docker looked like bash.
+
+**Decision:** `detectCommands()` reads a bash/sh source and returns the first binary of every
+simple command, skipping shell builtins, wrappers (`sudo`, `env`, `nohup`...) and leading
+`VAR=value` assignments. The list travels in `gap_log.commands`, and `exec_gaps` expands each
+command into its own row with `via: "script_run"`.
+
+**Consequences:** `exec_gaps` answers "which binary still has no tool". The detection is
+static: `eval`, `xargs` and variables holding a command are invisible, so the field is a hint
+for maintenance, never an input for policy.
+
+---
+
+## ADR-027 - Audit vocabulary separates preview from execution
+
+**Context:** every successful call was recorded as `allow`, including `dry_run` previews,
+which made the audit useless for measuring real activity and made a preview look like a
+mutation that ran.
+
+**Decision:** four decisions: `allow` (it ran), `preview` (`dry_run`, nothing ran),
+`confirm` (a token was requested, nothing ran) and `deny` (refused by mode, rate limit or
+denylist).
+
+**Consequences:** the counts in `docs/06-testing.md` mean what they say. Anything that
+aggregates the audit has to handle the new value.

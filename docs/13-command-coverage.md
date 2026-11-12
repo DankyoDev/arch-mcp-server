@@ -98,6 +98,21 @@ Promotion rule:
 | `patch`, `diff`, `comm`, `join` | Exec | `exec` |
 | `awk`, `perl`, `python` | Admin | `script_run` (not `exec_any`) |
 
+## Containers
+
+| Command | Status | Tool / note |
+|---|---|---|
+| `docker ps`, `docker container ls` | Native | `docker_ps` |
+| `docker logs` | Native | `docker_logs` (tail, since, substring, both streams) |
+| `docker inspect` | Native | `docker_inspect` (labels and env values omitted) |
+| `docker compose up/down/restart/stop/pull` | Native | `docker_compose` (token; file detected from the directory) |
+| `docker stats`, `docker exec` | Out | not implemented; `docker exec` is a shell in disguise |
+| `docker run`, `podman`, `nerdctl`, `docker-compose` | Out | denylist rule `containers`; `--privileged` and host namespaces stay blocked |
+
+`docker` used to be blocked everywhere. The gap log showed one Compose project taking eight
+`script_run` calls, so it became a native domain (ADR-025). `exec` and `exec_any` still refuse
+container CLIs: the only way in is the four tools above.
+
 ## Hardware, boot and security
 
 | Command | Status | Tool / note |

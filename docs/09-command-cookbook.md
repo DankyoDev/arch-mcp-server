@@ -328,7 +328,28 @@ find /etc -xdev -type f -perm -0002 2>/dev/null   # world-writable (limit it)
 
 ---
 
-## 10. Commands that are avoided
+## 10. Containers
+
+```sh
+docker ps -a --format '{{json .}}'
+docker logs --tail 200 --since 1h <name>
+docker inspect --format '{{json .}}' <name>
+docker compose -f <dir>/compose.yaml up -d [service...]
+```
+
+- Native: `docker_ps`, `docker_logs`, `docker_inspect`, `docker_compose`. `docker_compose`
+  detects the compose file inside the directory, so you pass `dir`, not `-f`.
+- `up` always runs detached; ordering is `up -d`, then `docker_ps`, then `docker_logs` if the
+  container is restarting.
+- Do not `sleep` inside a script to wait for a container: call `docker_ps` again, it is one
+  read.
+- `docker inspect` does not return labels or environment values: registries and compose files
+  put credentials there. `env_count` is enough to know if they exist.
+- `docker exec` is intentionally absent: it is a shell with extra steps.
+
+---
+
+## 11. Commands that are avoided
 
 | Instead of | Use |
 |---|---|

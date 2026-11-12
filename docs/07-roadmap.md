@@ -1,6 +1,6 @@
 # 07 - Roadmap
 
-> Status 2026-11-12: **phases 0-9 complete**, tag `v0.6.1`. 109 tools, 313 tests without network,
+> Status 2026-11-12: **phases 0-10 complete**, tag `v0.7.0`. 113 tools, 337 tests without network,
 > 20 evals averaging 291 tokens on the real host, HTTP with bearer token, MCP resources and CI on
 > GitHub Actions.
 
@@ -127,6 +127,25 @@ MCP; create and delete a test user; add and remove a static route.
 
 ---
 
+## Phase 10 - Containers and confirmation ergonomics (0.5 day)
+
+Triggered by an audit of one real session: one Compose project took 23 calls, four of them
+executions and eight `E_CONFIRM`. The fallback worked; the catalog and the confirmation flow
+did not.
+
+- [x] `docker_ps`, `docker_logs`, `docker_inspect`, `docker_compose` (ADR-025).
+- [x] Container CLIs stay out of `exec`/`exec_any`; `container-flags` still applies.
+- [x] A token request is a success with `confirm_required` (ADR-024); `E_CONFIRM` is an error.
+- [x] Fingerprint ignores `dry_run` and whitespace-only script changes; `dry_run` returns a token.
+- [x] `script_run` records the binaries it called and `exec_gaps` expands them (ADR-026).
+- [x] Audit records `allow`/`deny`/`confirm`/`preview` (ADR-027).
+
+**Acceptance:** bringing up a Compose project is five calls (compose preview, compose apply,
+`docker_ps`, `docker_logs`, `docker_inspect`) and every one of them is a typed tool with
+parsed output.
+
+---
+
 ## Total estimate
 
 | Phase | Days |
@@ -138,7 +157,8 @@ MCP; create and delete a test user; add and remove a static route.
 | 4 | 3 |
 | 5 | 2 |
 | 6 | 1 |
-| **Total** | **~15 days** of effective work |
+| 10 | 0.5 |
+| **Total** | **~15.5 days** of effective work |
 
 ## Risks and mitigation
 

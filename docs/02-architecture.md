@@ -91,6 +91,8 @@ src/
 │   └── audit.ts        # JSONL with redaction
 └── tools/
     ├── sys.ts svc.ts log.ts pkg.ts net.ts fs.ts hw.ts boot.ts usr.ts sec.ts job.ts
+    ├── docker.ts       # containers and Compose projects
+    └── exec.ts         # allowlisted binaries, escape hatch and gap log
 ```
 
 ## 5. Tool profiles
@@ -99,9 +101,9 @@ Clients without Code Mode load every definition. To avoid inflating the context:
 
 | Profile | Tools | Use |
 |---|---|---|
-| `core` (default) | ~12 | What is used 90% of the time |
-| `readonly` | ~46 | Full diagnostics without mutations |
-| `full` | 109 | Everything, including writes and jobs |
+| `core` (default) | 12 | What is used 90% of the time |
+| `readonly` | 66 | Full diagnostics without mutations |
+| `full` | 113 | Everything, including writes and jobs |
 
 It is selected with `ARCH_MCP_PROFILE`. The exact list is in `docs/03-tool-catalog.md`.
 
@@ -150,6 +152,10 @@ type ErrCode =
 Rules:
 
 - `E_POLICY` and `E_CONFIRM` **never** execute anything.
+- A mutation that still needs its token is **not** an error: it returns `ok: true` with
+  `confirm_required: true`, the `token`, its TTL and the preview (ADR-024). `E_CONFIRM` is
+  reserved for a token that is unknown, expired, already used or bound to other arguments, so
+  a client can tell "confirm this" from "something went wrong".
 - Transport failures travel as `TransportError` and **keep their code**
   (`E_CONN`, `E_AUTH`, `E_TIMEOUT`) when the rejection is converted into a `Result`. They are never downgraded to
   `E_INTERNAL`.

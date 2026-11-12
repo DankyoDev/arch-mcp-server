@@ -1,6 +1,6 @@
 # 03 - Tool catalog
 
-109 tools across 13 domains. `core` = 12, `readonly` = 63, `full` = 109.
+113 tools across 14 domains. `core` = 12, `readonly` = 66, `full` = 113.
 
 Column legend:
 
@@ -13,7 +13,7 @@ Column legend:
 `sys_info`, `sys_status`, `svc_list`, `svc_status`, `svc_failed`, `log_query`,
 `log_errors`, `pkg_status`, `fs_usage`, `net_ports`, `proc_list`, `host_capabilities`.
 
-> Status: the `full` profile registers **109/109** tools and `readonly` **63/63**;
+> Status: the `full` profile registers **113/113** tools and `readonly` **66/66**;
 > `core` is 12. Profiles are selected with `ARCH_MCP_PROFILE`.
 
 ---
@@ -272,6 +272,27 @@ it. `http_check` does not fail on a 4xx/5xx: it returns the code and `ok` accord
 
 ---
 
+## docker_ - containers (4)
+
+| Tool | What it answers | Params | Output | Bytes | A |
+|---|---|---|---:|---:|---|
+| `docker_ps` | Which containers exist and in what state | `all`(true), `project`, `name`, `limit`(50), `cursor` | [{name, id, image, state, status, ports, project?, service?, health?}] | 4000 | R |
+| `docker_logs` | Last lines of one container | `name`, `tail`(100), `since`, `timestamps`(false), `contains` | {name, tail, stdout[], stderr[], truncated} | 4000 | R |
+| `docker_inspect` | One container in detail | `name` | {name, id, image, state, running, restart_policy, health?, ports{}, networks[], mounts[], env_count} | 500 | R |
+| `docker_compose` | `up -d`, `down`, `restart`, `stop`, `pull` on a project | `dir`, `action`, `file?`, `services[]`, `build`, `remove_orphans`, `timeout_ms`, `dry_run`, `token` | {dir, action, services[], code, stdout, stderr, truncated, ms} | 400 | D,O |
+
+The Compose file is detected from `dir` in **one** round trip (`compose.yaml`, `compose.yml`,
+`docker-compose.yaml`, `docker-compose.yml`), the file name is validated and services are
+appended as separate argv elements. The tool never builds a shell string, and `up` is always
+detached. Labels and environment values are not returned: `docker_inspect` gives `env_count`
+instead of the values, because registries and compose files put secrets there.
+
+Container CLIs stay blocked for `exec` and `exec_any` (denylist rule `containers`); these four
+tools are the only sanctioned path, and the `container-flags` rule keeps `--privileged`,
+`--pid=host` and friends out even here.
+
+---
+
 ## fs_ - storage (21)
 
 | Tool | What it answers | Params | Output | Bytes | A |
@@ -423,7 +444,7 @@ validated element by element and is never interpolated into a shell string.
 | `fetch_url` | dry_run | 184 | 1 |
 | `http_check` | connection error | 193 | 2000 |
 
-`tools/list` with `profile=full` registers **109** tools, exactly the catalog.
+`tools/list` with `profile=full` registers **113** tools, exactly the catalog.
 
 **Phase 9 measurements** (`arch-systemd`, 2026-11-12, `mode=admin` + sudo):
 
@@ -435,10 +456,18 @@ validated element by element and is never interpolated into a shell string.
 | `svc_unit_write` | dry_run | 207 | 1 |
 | `svc_unit_delete` | dry_run | 181 | 1 |
 
-Phase 4 acceptance verified end to end: in `readonly` the six mutations return
-`E_POLICY`; in `write` without a token they return `E_CONFIRM`; with a token they run once and
-a reused token returns `E_CONFIRM`. The audit records `allow`/`deny`/`confirm` and does not
-contain tokens or file contents.
+**Phase 10 measurements** (`arch-mcp` fixtures, 2026-11-12, no host contact):
+
+| Tool | Case | Bytes | ms |
+|---|---|---:|---:|
+| `docker_ps` | 3 containers, Compose labels | 581 | - |
+| `docker_logs` | 50 lines with timestamps | 2175 | - |
+| `docker_inspect` | running container, 3 env vars | 488 | - |
+
+Phase 4 acceptance verified end to end: in `readonly` the six mutations return `E_POLICY`; in
+`write` without a token they return `ok: true` with `confirm_required` and nothing runs; with
+the token they run once, and a reused token returns `E_CONFIRM`. The audit records
+`allow`/`deny`/`confirm`/`preview` and does not contain tokens or file contents.
 
 ---
 

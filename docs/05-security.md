@@ -41,11 +41,11 @@ ARCH_MCP_CONFIRM_TTL=120
 Every destructive tool follows this protocol:
 
 1. The agent calls **without** `token`.
-2. The server **does not execute** and responds:
+2. The server **does not execute** and answers with a **success** that carries the token:
 
 ```json
-{"ok":false,"error":{"code":"E_CONFIRM","message":"confirmation required",
- "hint":"repeat the call with token"},"data":{
+{"ok":true,"data":{
+   "confirm_required":true,
    "token":"a1b2c3d4",
    "expires_in_s":120,
    "preview":{"unit":"nginx.service","action":"restart",
@@ -54,6 +54,11 @@ Every destructive tool follows this protocol:
 
 3. The agent repeats with `token`. The token is validated against
    `sha256(tool + args + nonce)[:8]`, has a TTL and is single-use.
+
+The response is not an error on purpose (ADR-024): clients treat `isError: true` as a failure
+and start "fixing" the call instead of confirming it. `E_CONFIRM` is left for a token that is
+unknown, expired, reused or bound to other arguments. `dry_run` returns the preview and a
+token for the real call, so the safe path is two calls, not three.
 
 Benefits: the human sees the `preview`, the agent cannot "forget" the step, and the audit
 records who confirmed what.
@@ -78,7 +83,12 @@ init 0              init 6              kill -9 1          :(){ :|:& };:
 ~/.ssh/authorized_keys  ~/.ssh/id_*  /boot/*  /etc/fstab  /etc/crypttab
 ```
 
-### 4.3 Containers and hypervisor (out of scope, but blocked)
+### 4.3 Containers
+
+`docker`, `podman`, `docker-compose` and `nerdctl` are refused as `exec`/`exec_any`/`raw_exec`
+targets (rule `containers`). Containers are reachable only through `docker_ps`, `docker_logs`,
+`docker_inspect` and `docker_compose`, which still run with confirmation and with the
+`container-flags` rule below.
 
 ```
 docker run --privileged            # the 2026-11-12 incident
@@ -91,7 +101,10 @@ nsenter -t 1 -m -u -i -n -p
 
 > **Root cause of the incident:** a containerized `systemd` with `--privileged` and
 > `--cgroupns=host` sees the host cgroups and can terminate it. The MCP must not allow
-> building that command from any tool, including `raw_exec`, `exec` and `exec_any`.
+> building that command from any tool, including `raw_exec`, `exec` and `exec_any`. The
+> `docker_*` tools only run a fixed set of Compose subcommands, so this argv never gets built;
+> `docker_compose` can still act on a compose file that declares `privileged: true`, which is
+> why it is `full`-profile, `admin` only and behind a token.
 
 ### 4.4 Network
 
@@ -132,6 +145,8 @@ JSONL file at `~/.local/state/arch-mcp/audit.jsonl` (configurable). One line per
  "mode":"write","decision":"allow","confirmed":true,"ms":812,"exit":"OK"}
 ```
 
+- `decision` is `allow` only for a call that really ran; a request for a token is `confirm`,
+  a `dry_run` is `preview`, and a refused call is `deny`.
 - Rotation by size (5 MB, 3 files).
 - It never contains command output or file contents: `content`, `stdout` and `stderr` are
   redacted along with `pass`, `token`, `key` and `secret`.
