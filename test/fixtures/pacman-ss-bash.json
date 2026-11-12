@@ -1,0 +1,13 @@
+{
+  "cmd": [
+    "pacman",
+    "-Ss",
+    "bash"
+  ],
+  "exit": 0,
+  "stdout": "core/bash 5.3.20-1 [installed]\n    The GNU Bourne Again shell\nextra/argbash 2.11.0-1\n    Bash argument parsing code generator\nextra/bash-completion 2.18.0-1\n    Programmable completion for the bash shell\nextra/bash-language-server 5.6.0-1\n    Bash language server implementation based on Tree Sitter and its grammar for Bash\nextra/bash-preexec 0.7.0-1\n    preexec and precmd functions for Bash just like Zsh\nextra/bashbrew 0.1.13-1\n    Canonical build tool for Docker official images\nextra/bashburn 4.0.0-1\n    CD burning shell script\nextra/bashrun 0.16.1-6\n    An x11 application launcher based on bash\nextra/bashtop 0.9.25-2\n    Linux resource monitor\nextra/bat-extras 2024.08.24-1\n    Bash scripts that integrate bat with various command line tools\nextra/bats 1.14.0-1\n    Bash Automated Testing System\nextra/brush 0.4.0-1\n    Bash/POSIX-compatible shell implemented in Rust\nextra/checkbashisms 2.26.15-1\n    Debian script that checks for bashisms\nextra/dhall-bash 1.0.41-288\n    Compile Dhall to Bash\nextra/nvm 0.40.8-1\n    Node Version Manager - Simple bash script to manage multiple active node.js versions\nextra/powerline 2.8.4-4\n    Statuslines and prompts for several applications including vim, zsh, bash, tmux, IPython, Awesome, i3 and Qtile\nextra/python-bracex 3.2.2-1\n    Bash style brace expansion for Python\nextra/redo-sh 4.0.7-1\n    An implementation of the Redo build system in Bash\nextra/screenfetch 3.9.9-1\n    CLI Bash script to show system/theme info in screenshots\nextra/shellharden 4.3.2-1\n    Bash linter and syntax highlighter\nextra/texlive-latexextra 2026.1-1 (texlive)\n    TeX Live - LaTeX additional packages\nextra/tree-sitter-bash 0.25.1-2 (tree-sitter-grammars)\n    Bash grammar for tree-sitter\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

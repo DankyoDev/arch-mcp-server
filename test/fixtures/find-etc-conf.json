@@ -1,0 +1,20 @@
+{
+  "cmd": [
+    "find",
+    "/etc",
+    "-maxdepth",
+    "6",
+    "-type",
+    "f",
+    "-name",
+    "*.conf",
+    "-printf",
+    "%p\t%s\t%T@\n"
+  ],
+  "exit": 0,
+  "stdout": "/etc/e2scrub.conf\t685\t1772899526.0000000000\n/etc/pacman.d/gnupg/gpg-agent.conf\t17\t1794096232.0000000000\n/etc/pacman.d/gnupg/gpg.conf\t130\t1794096232.0000000000\n/etc/ld.so.conf\t154\t1760286101.0000000000\n/etc/tunables.conf\t36\t1790526947.0000000000\n/etc/gai.conf\t2584\t1790526947.0000000000\n/etc/openldap/ldap.conf\t247\t1792845584.0000000000\n/etc/systemd/pstore.conf\t879\t1793885791.0000000000\n/etc/systemd/resolved.conf\t2180\t1793885791.0000000000\n/etc/systemd/logind.conf\t1803\t1793885791.0000000000\n/etc/systemd/system.conf\t2628\t1793885791.0000000000\n/etc/systemd/sleep.conf\t1102\t1793885791.0000000000\n/etc/systemd/journald.conf\t1435\t1793885791.0000000000\n/etc/systemd/journal-remote.conf\t1137\t1793885791.0000000000\n/etc/systemd/timesyncd.conf\t1068\t1793885791.0000000000\n/etc/systemd/coredump.conf\t1037\t1793885791.0000000000\n/etc/systemd/user.conf\t1997\t1793885791.0000000000\n/etc/systemd/networkd.conf\t1391\t1793885791.0000000000\n/etc/systemd/journal-upload.conf\t1087\t1793885791.0000000000\n/etc/systemd/oomd.conf\t928\t1793885791.0000000000\n/etc/systemd/homed.conf\t890\t1793885791.0000000000\n/etc/udev/udev.conf\t305\t1793885791.0000000000\n/etc/udev/iocost.conf\t865\t1793885791.0000000000\n/etc/mke2fs.conf\t813\t1772899526.0000000000\n/etc/audit/auditd.conf\t1324\t1785433552.0000000000\n/etc/makepkg.conf.d/fortran.conf\t840\t1792847381.0000000000\n/etc/makepkg.conf.d/rust.conf\t643\t1792847381.0000000000\n/etc/krb5.conf\t369\t1792851019.0000000000\n/etc/arptables.conf\t0\t1775727399.0000000000\n/etc/ssh/sshd_config.d/99-archlinux.conf\t93\t1792851858.0000000000\n/etc/xattr.conf\t622\t1782738777.0000000000\n/etc/security/access.conf\t4671\t1790490205.0000000000\n/etc/security/group.conf\t3635\t1790490205.0000000000\n/etc/security/namespace.conf\t1637\t1790490205.0000000000\n/etc/security/pam_env.conf\t2971\t1790490205.0000000000\n/etc/security/limits.conf\t2473\t1790490205.0000000000\n/etc/security/time.conf\t2179\t1790490205.0000000000\n/etc/security/pwhistory.conf\t512\t1790490205.0000000000\n/etc/security/faillock.conf\t2207\t1790490205.0000000000\n/etc/ebtables.conf\t0\t1775727399.0000000000\n/etc/nsswitch.conf\t359\t1760286101.0000000000\n/etc/tunables.conf.d/shstk.conf\t1172\t1790526947.0000000000\n/etc/locale.conf\t13\t1794096211.0000000000\n/etc/request-key.conf\t1814\t1776025534.0000000000\n/etc/libaudit.conf\t191\t1785433552.0000000000\n/etc/host.conf\t73\t1760286101.0000000000\n/etc/makepkg.conf\t6498\t1792847381.0000000000\n/etc/pacman.conf\t3594\t1794096215.0000000000\n/etc/nftables.conf\t780\t1788293182.0000000000\n/etc/updatedb.conf\t568\t1788683881.0000000000\n/etc/vconsole.conf\t79\t1793885791.0000000000\n/etc/smartd.conf\t6057\t1791495752.0000000000\n/etc/resolv.conf\t312\t1794500831.4104740000\n/etc/sudo.conf\t4344\t1792850456.0000000000\n/etc/healthd.conf\t450\t1747200215.0000000000\n/etc/sudo_logsrvd.conf\t9800\t1792850456.0000000000\n/etc/sensors3.conf\t10749\t1747200215.0000000000\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

@@ -1,0 +1,13 @@
+{
+  "cmd": [
+    "test",
+    "-d",
+    "/sys/firmware/efi"
+  ],
+  "exit": 1,
+  "stdout": "",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

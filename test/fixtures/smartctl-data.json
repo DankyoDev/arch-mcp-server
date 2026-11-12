@@ -1,0 +1,15 @@
+{
+  "cmd": [
+    "smartctl",
+    "-j",
+    "-H",
+    "-A",
+    "/dev/nvme0n1"
+  ],
+  "exit": 0,
+  "stdout": "{\"device\":{\"name\":\"/dev/nvme0n1\",\"type\":\"nvme\"},\"model_name\":\"Samsung SSD 990 PRO 2TB\",\"smart_status\":{\"passed\":true},\"temperature\":{\"current\":41},\"power_on_time\":{\"hours\":12873}}\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T15:00:00.000Z",
+  "host": "synthetic",
+  "synthetic": true
+}

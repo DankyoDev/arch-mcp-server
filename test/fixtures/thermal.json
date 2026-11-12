@@ -1,0 +1,13 @@
+{
+  "cmd": [
+    "sh",
+    "-c",
+    "cat /sys/class/thermal/thermal_zone*/temp"
+  ],
+  "exit": 1,
+  "stdout": "",
+  "stderr": "cat: '/sys/class/thermal/thermal_zone*/temp': No such file or directory\n",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

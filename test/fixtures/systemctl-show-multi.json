@@ -1,0 +1,25 @@
+{
+  "cmd": [
+    "systemctl",
+    "show",
+    "sshd.service",
+    "systemd-tmpfiles-clean.timer",
+    "-p",
+    "Id",
+    "-p",
+    "StateChangeTimestamp",
+    "-p",
+    "InactiveEnterTimestamp",
+    "-p",
+    "Result",
+    "-p",
+    "ExecMainStatus",
+    "--no-pager"
+  ],
+  "exit": 0,
+  "stdout": "Id=sshd.service\nStateChangeTimestamp=Thu 2026-11-12 16:27:12 UTC\nInactiveEnterTimestamp=\nResult=success\nExecMainStatus=0\n\nId=systemd-tmpfiles-clean.timer\nStateChangeTimestamp=Thu 2026-11-12 16:32:48 UTC\nInactiveEnterTimestamp=\nResult=success\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

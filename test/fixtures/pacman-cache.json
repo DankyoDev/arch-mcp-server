@@ -1,0 +1,13 @@
+{
+  "cmd": [
+    "du",
+    "-sb",
+    "/var/cache/pacman/pkg"
+  ],
+  "exit": 0,
+  "stdout": "46492297\t/var/cache/pacman/pkg\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

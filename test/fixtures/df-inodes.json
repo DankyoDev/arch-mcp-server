@@ -1,0 +1,14 @@
+{
+  "cmd": [
+    "df",
+    "-P",
+    "-i",
+    "-B1"
+  ],
+  "exit": 0,
+  "stdout": "Filesystem       Inodes IUsed    IFree IUse% Mounted on\noverlay        31170560 53121 31117439    1% /\ntmpfs            506903   479   506424    1% /dev\nshm              506903     1   506902    1% /dev/shm\ntmpfs            506903   630   506273    1% /run\n/dev/vda1      31170560 53121 31117439    1% /etc/hosts\nhost                  -     -        -     - /keys/id_test.pub\ntmpfs            506903     1   506902    1% /run/lock\ntmpfs           1048576     5  1048571    1% /tmp\nnone               1024     1     1023    1% /run/credentials/systemd-resolved.service\nnone               1024     1     1023    1% /run/credentials/systemd-networkd.service\nnone               1024     1     1023    1% /run/credentials/getty@tty1.service\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

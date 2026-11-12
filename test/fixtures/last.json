@@ -1,0 +1,14 @@
+{
+  "cmd": [
+    "last",
+    "-F",
+    "-n",
+    "10"
+  ],
+  "exit": 0,
+  "stdout": "reboot   system boot  7.0.14-linuxkit  Thu Nov 12 16:27:11 2026   still running\nreboot   system boot  7.0.14-linuxkit  Thu Nov 12 14:28:23 2026   still running\nreboot   system boot  7.0.14-linuxkit  Thu Nov 12 06:46:12 2026   still running\n\nwtmp begins Thu Nov 12 06:46:12 2026\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

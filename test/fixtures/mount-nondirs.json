@@ -1,0 +1,13 @@
+{
+  "cmd": [
+    "sh",
+    "-c",
+    "findmnt -rn -o TARGET | while read -r t; do [ -d \"$t\" ] || printf \"%s\\n\" \"$t\"; done"
+  ],
+  "exit": 0,
+  "stdout": "/etc/hostname\n/etc/hosts\n/etc/resolv.conf\n/keys/id_test.pub\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

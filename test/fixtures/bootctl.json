@@ -1,0 +1,12 @@
+{
+  "cmd": [
+    "bootctl",
+    "status"
+  ],
+  "exit": 0,
+  "stdout": "System:\nNot booted with EFI\n\n",
+  "stderr": "Not booted with EFI or running in a container, skipping EFI variable modifications.\nCouldn't find EFI system partition. It is recommended to mount it to /boot/ or /efi/.\nAlternatively, use --esp-path= to specify path to mount point.\n",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

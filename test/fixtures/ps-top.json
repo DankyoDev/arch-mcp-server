@@ -1,0 +1,16 @@
+{
+  "cmd": [
+    "ps",
+    "-e",
+    "-o",
+    "pid=,comm=,pcpu=,pmem=",
+    "--sort=-pcpu",
+    "--no-headers"
+  ],
+  "exit": 0,
+  "stdout": "    875 sshd-session     4.7  0.1\n    872 sshd-session     3.8  0.3\n      1 systemd          0.5  0.4\n     60 systemd-udevd    0.0  0.2\n     66 systemd-network  0.0  0.2\n     55 systemd-resolve  0.0  0.2\n    111 sshd             0.0  0.1\n     42 systemd-userdbd  0.0  0.1\n     43 systemd-nsresou  0.0  0.1\n    113 agetty           0.0  0.0\n    301 sleep            0.0  0.0\n    771 systemd-userwor  0.0  0.1\n    772 systemd-userwor  0.0  0.1\n    773 systemd-userwor  0.0  0.1\n    774 systemd-nsresou  0.0  0.1\n    775 systemd-nsresou  0.0  0.1\n    776 systemd-nsresou  0.0  0.1\n    777 systemd-nsresou  0.0  0.1\n    778 systemd-nsresou  0.0  0.1\n    894 ps               0.0  0.0\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

@@ -1,0 +1,16 @@
+{
+  "cmd": [
+    "nmcli",
+    "-t",
+    "-f",
+    "IN-USE,SSID,SIGNAL,RATE,SECURITY",
+    "dev",
+    "wifi"
+  ],
+  "exit": 0,
+  "stdout": "*:HomeNet:72:130 Mbit/s:WPA2\n:Neighbor:31:54 Mbit/s:WPA2\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T15:00:00.000Z",
+  "host": "synthetic",
+  "synthetic": true
+}

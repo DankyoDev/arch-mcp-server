@@ -1,0 +1,12 @@
+{
+  "cmd": [
+    "cat",
+    "/proc/cmdline"
+  ],
+  "exit": 0,
+  "stdout": "init=/initd loglevel=1 root=/dev/vdb rootfstype=iso9660 ro vsyscall=emulate panic=0 eth0.dhcp eth1.dhcp linuxkit.unified_cgroup_hierarchy=1 console=hvc0   virtio_net.disable_csum=1  vpnkit.connect=connect://2/1999 display.vsock_port=4420 sailor.guest_agents=1 uds.forward_vsock_port=4424 uds.reverse_vsock_port=4427 swiotlb=noforce no_timer_check tsc=reliable cryptomgr.notests=1 mce=off virtiofs.poll_us=200 page_reporting.page_reporting_order=9 page_reporting.page_reporting_delay_ms=500 sailor_metrics_gpa=0x1033ff000\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

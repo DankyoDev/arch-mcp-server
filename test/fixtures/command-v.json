@@ -1,0 +1,13 @@
+{
+  "cmd": [
+    "sh",
+    "-c",
+    "command -v pacman systemctl journalctl nmcli sensors nvidia-smi smartctl dkms checkupdates ss nft iptables lspci lsusb yay paru"
+  ],
+  "exit": 0,
+  "stdout": "/usr/bin/pacman\n/usr/bin/systemctl\n/usr/bin/journalctl\n/usr/bin/sensors\n/usr/bin/smartctl\n/usr/bin/checkupdates\n/usr/bin/ss\n/usr/bin/nft\n/usr/bin/iptables\n/usr/bin/lspci\n/usr/bin/lsusb\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

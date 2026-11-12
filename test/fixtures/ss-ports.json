@@ -1,0 +1,12 @@
+{
+  "cmd": [
+    "ss",
+    "-tulnpH"
+  ],
+  "exit": 0,
+  "stdout": "udp UNCONN 0      0            0.0.0.0:5353  0.0.0.0:* users:((\"systemd-resolve\",pid=55,fd=16))\nudp UNCONN 0      0            0.0.0.0:5355  0.0.0.0:* users:((\"systemd-resolve\",pid=55,fd=12))\nudp UNCONN 0      0         127.0.0.54:53    0.0.0.0:* users:((\"systemd-resolve\",pid=55,fd=24))\nudp UNCONN 0      0      127.0.0.53%lo:53    0.0.0.0:* users:((\"systemd-resolve\",pid=55,fd=22))\nudp UNCONN 0      0         127.0.0.11:39611 0.0.0.0:*\nudp UNCONN 0      0               [::]:5353     [::]:* users:((\"systemd-resolve\",pid=55,fd=17))\nudp UNCONN 0      0               [::]:5355     [::]:* users:((\"systemd-resolve\",pid=55,fd=14))\ntcp LISTEN 0      4096   127.0.0.53%lo:53    0.0.0.0:* users:((\"systemd-resolve\",pid=55,fd=23))\ntcp LISTEN 0      4096         0.0.0.0:5355  0.0.0.0:* users:((\"systemd-resolve\",pid=55,fd=13))\ntcp LISTEN 0      4096      127.0.0.54:53    0.0.0.0:* users:((\"systemd-resolve\",pid=55,fd=25))\ntcp LISTEN 0      128          0.0.0.0:22    0.0.0.0:* users:((\"sshd\",pid=111,fd=6))\ntcp LISTEN 0      4096      127.0.0.11:35313 0.0.0.0:*\ntcp LISTEN 0      4096            [::]:5355     [::]:* users:((\"systemd-resolve\",pid=55,fd=15))\ntcp LISTEN 0      128             [::]:22       [::]:* users:((\"sshd\",pid=111,fd=7))\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

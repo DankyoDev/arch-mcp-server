@@ -1,0 +1,15 @@
+{
+  "cmd": [
+    "smartctl",
+    "-j",
+    "-H",
+    "-A",
+    "/dev/vda"
+  ],
+  "exit": 1,
+  "stdout": "{\n  \"json_format_version\": [\n    1,\n    0\n  ],\n  \"smartctl\": {\n    \"version\": [\n      7,\n      5\n    ],\n    \"pre_release\": false,\n    \"svn_revision\": \"5714\",\n    \"platform_info\": \"x86_64-linux-7.0.14-linuxkit\",\n    \"build_info\": \"(local build)\",\n    \"argv\": [\n      \"smartctl\",\n      \"-j\",\n      \"-H\",\n      \"-A\",\n      \"/dev/vda\"\n    ],\n    \"messages\": [\n      {\n        \"string\": \"/dev/vda: Unable to detect device type\",\n        \"severity\": \"error\"\n      }\n    ],\n    \"exit_status\": 1\n  },\n  \"local_time\": {\n    \"time_t\": 1794501188,\n    \"asctime\": \"Thu Nov 12 16:33:08 2026 UTC\"\n  }\n}\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

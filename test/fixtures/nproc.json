@@ -1,0 +1,12 @@
+{
+  "cmd": [
+    "nproc",
+    "--all"
+  ],
+  "exit": 0,
+  "stdout": "16\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

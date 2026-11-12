@@ -1,0 +1,13 @@
+{
+  "cmd": [
+    "lspci",
+    "-mm",
+    "-nn"
+  ],
+  "exit": 0,
+  "stdout": "00:01.0 \"SCSI storage controller [0100]\" \"Red Hat, Inc. [1af4]\" \"Virtio 1.0 block device [1042]\" -r01 -p00 \"Red Hat, Inc. [1af4]\" \"Device [0042]\"\n00:02.0 \"SCSI storage controller [0100]\" \"Red Hat, Inc. [1af4]\" \"Virtio 1.0 block device [1042]\" -r01 -p00 \"Red Hat, Inc. [1af4]\" \"Device [0042]\"\n00:03.0 \"Ethernet controller [0200]\" \"Red Hat, Inc. [1af4]\" \"Virtio 1.0 network device [1041]\" -r01 -p00 \"Red Hat, Inc. [1af4]\" \"Device [0041]\"\n00:04.0 \"Serial controller [0700]\" \"Red Hat, Inc. [1af4]\" \"Virtio 1.0 console [1043]\" -r01 -p00 \"Red Hat, Inc. [1af4]\" \"Device [0043]\"\n00:05.0 \"SCSI storage controller [0100]\" \"Red Hat, Inc. [1af4]\" \"Virtio 1.0 file system [105a]\" -r01 -p00 \"Red Hat, Inc. [1af4]\" \"Device [005a]\"\n00:06.0 \"RAM memory [0500]\" \"Red Hat, Inc. [1af4]\" \"Virtio 1.0 balloon [1045]\" -r01 -p00 \"Red Hat, Inc. [1af4]\" \"Device [0045]\"\n00:07.0 \"Unassigned class [ff00]\" \"Red Hat, Inc. [1af4]\" \"Virtio 1.0 RNG [1044]\" -r01 -p00 \"Red Hat, Inc. [1af4]\" \"Device [0044]\"\n00:08.0 \"Unassigned class [ff00]\" \"Red Hat, Inc. [1af4]\" \"Virtio 1.0 clock/timer [1051]\" -r01 -p00 \"Red Hat, Inc. [1af4]\" \"Device [0051]\"\n00:09.0 \"Serial controller [0700]\" \"Red Hat, Inc. [1af4]\" \"Virtio 1.0 socket [1053]\" -r01 -p00 \"Red Hat, Inc. [1af4]\" \"Device [0053]\"\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

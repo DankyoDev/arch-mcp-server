@@ -1,0 +1,13 @@
+{
+  "cmd": [
+    "pacman",
+    "-Qi",
+    "bash"
+  ],
+  "exit": 0,
+  "stdout": "Name            : bash\nVersion         : 5.3.20-1\nDescription     : The GNU Bourne Again shell\nArchitecture    : x86_64\nURL             : https://www.gnu.org/software/bash/bash.html\nLicenses        : GPL-3.0-or-later\nGroups          : None\nProvides        : sh\nDepends On      : readline  libreadline.so=8-64  glibc  ncurses\nOptional Deps   : bash-completion: for tab completion\nRequired By     : audit  base  bzip2  ca-certificates-utils  device-mapper  e2fsprogs  gawk  gdbm  gettext  glib2  gnupg  gpm  gzip  icu  iptables  keyutils  krb5  libassuan  libgpg-error  libksba  libmakepkg-dropins  libpcap  libxml2  lm_sensors  npth  pacman  smartmontools  systemd  which  xz\nOptional For    : ncurses  openssh  pcre2  tzdata  usbutils  vim-runtime\nConflicts With  : None\nReplaces        : None\nInstalled Size  : 9.59 MiB\nPackager        : Tobias Powalowski <tpowa@archlinux.org>\nBuild Date      : Tue Sep 15 19:47:19 2026\nInstall Date    : Sun Nov  8 00:00:00 2026\nInstall Reason  : Installed as a dependency for another package\nInstall Script  : Yes\nValidated By    : Signature\n\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

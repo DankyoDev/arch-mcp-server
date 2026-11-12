@@ -1,0 +1,12 @@
+{
+  "cmd": [
+    "sensors",
+    "-j"
+  ],
+  "exit": 1,
+  "stdout": "{}\n",
+  "stderr": "/sys: No sensors at /sys/class/hwmon.\nNo sensors found!\nMake sure you loaded all the kernel drivers you need.\nTry sensors-detect to find out which these are.\n",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

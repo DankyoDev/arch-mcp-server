@@ -1,0 +1,15 @@
+{
+  "cmd": [
+    "systemctl",
+    "list-timers",
+    "--all",
+    "--output=json",
+    "--no-pager"
+  ],
+  "exit": 0,
+  "stdout": "[{\"next\":1794501731481934,\"left\":1794501731481934,\"last\":0,\"passed\":0,\"unit\":\"systemd-tmpfiles-clean.timer\",\"activates\":\"systemd-tmpfiles-clean.service\"},{\"next\":1794528000000000,\"left\":1794528000000000,\"last\":1794465973790299,\"passed\":0,\"unit\":\"shadow.timer\",\"activates\":\"shadow.service\"},{\"next\":1795229343782597,\"left\":1795229343782597,\"last\":1794465973790233,\"passed\":0,\"unit\":\"archlinux-keyring-wkd-sync.timer\",\"activates\":\"archlinux-keyring-wkd-sync.service\"},{\"next\":null,\"left\":null,\"last\":0,\"passed\":0,\"unit\":\"plocate-updatedb.timer\",\"activates\":\"plocate-updatedb.service\"}]\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

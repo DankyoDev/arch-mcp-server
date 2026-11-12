@@ -1,0 +1,83 @@
+{
+  "name": "arch-mcp-server",
+  "version": "0.6.1",
+  "description": "MCP server for Linux host administration over SSH, with first-class Arch Linux support",
+  "type": "module",
+  "bin": {
+    "arch-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DankyoDev/arch-mcp-server.git"
+  },
+  "homepage": "https://github.com/DankyoDev/arch-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/DankyoDev/arch-mcp-server/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "test": "node --import tsx --test \"test/**/*.test.ts\"",
+    "test:e2e": "tsx test/measure.ts",
+    "lint": "tsc --noEmit",
+    "fixtures": "tsx scripts/capture-fixtures.ts",
+    "audit:tools": "tsx scripts/audit-tools.ts",
+    "measure": "tsx test/measure.ts",
+    "prepack": "pnpm build",
+    "prepublishOnly": "pnpm lint && pnpm test && pnpm build"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "ai",
+    "agent",
+    "llm",
+    "arch",
+    "archlinux",
+    "linux",
+    "ssh",
+    "remote-administration",
+    "server-management",
+    "systemd",
+    "journalctl",
+    "pacman",
+    "aur",
+    "sysadmin",
+    "homelab",
+    "self-hosted"
+  ],
+  "author": "DankyoDev <abrahamlaffontt897@gmail.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "pnpm@11.1.1",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "ssh2": "^1.17.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/ssh2": "^1.15.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ],
+    "ignoredBuiltDependencies": [
+      "cpu-features",
+      "ssh2"
+    ]
+  }
+}

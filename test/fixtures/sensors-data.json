@@ -1,0 +1,12 @@
+{
+  "cmd": [
+    "sensors",
+    "-j"
+  ],
+  "exit": 0,
+  "stdout": "{\"coretemp-isa-0000\":{\"Adapter\":\"ISA adapter\",\"Package id 0\":{\"temp1_input\":48,\"temp1_max\":100,\"temp1_crit\":100},\"Core 0\":{\"temp2_input\":46},\"Core 1\":{\"temp3_input\":47}},\"nvme-pci-0100\":{\"Adapter\":\"PCI adapter\",\"Composite\":{\"temp1_input\":38.85,\"temp1_max\":81.85},\"Fan\":{\"fan1_input\":2100}}}\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T15:00:00.000Z",
+  "host": "synthetic",
+  "synthetic": true
+}

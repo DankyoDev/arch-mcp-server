@@ -1,0 +1,12 @@
+{
+  "cmd": [
+    "cat",
+    "/proc/net/dev"
+  ],
+  "exit": 0,
+  "stdout": "Inter-|   Receive                                                |  Transmit\n face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed\n    lo:    2581      33    0    0    0     0          0         0     2581      33    0    0    0     0       0          0\n tunl0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\n  gre0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\ngretap0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\nerspan0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\nip_vti0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\nip6_vti0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\n  sit0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\nip6tnl0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\nip6gre0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0\n  eth0: 10622251    2273    0    0    0     0          0         0   944453    2513    0    0    0     0       0          0\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

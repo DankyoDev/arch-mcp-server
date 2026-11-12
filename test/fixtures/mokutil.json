@@ -1,0 +1,12 @@
+{
+  "cmd": [
+    "mokutil",
+    "--sb-state"
+  ],
+  "exit": 127,
+  "stdout": "",
+  "stderr": "env: 'mokutil': No such file or directory\n",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

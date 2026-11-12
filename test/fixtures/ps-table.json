@@ -1,0 +1,16 @@
+{
+  "cmd": [
+    "ps",
+    "-e",
+    "-o",
+    "pid=,ppid=,user:16=,pcpu=,pmem=,rss=,stat=,etimes=,args=",
+    "--sort=-pcpu",
+    "--no-headers"
+  ],
+  "exit": 0,
+  "stdout": "    875     872 root              5.0  0.1  7940 S          0 sshd-session: root@notty\n    872     111 root              4.0  0.3 13768 Ss         0 sshd-session: root [postauth]\n      1       0 root              0.5  0.4 16496 Ss       355 /usr/lib/systemd/systemd\n     60       1 root              0.0  0.2 11224 Ss       355 /usr/lib/systemd/systemd-udevd\n     66       1 systemd-network   0.0  0.2 10044 Ss       355 /usr/lib/systemd/systemd-networkd\n     55       1 systemd-resolve   0.0  0.2  8160 Ss       355 /usr/lib/systemd/systemd-resolved\n    111       1 root              0.0  0.1  7648 Ss       354 sshd: /usr/bin/sshd -D [listener] 0 of 10-100 startups\n     42       1 root              0.0  0.1  4736 Ss       355 /usr/lib/systemd/systemd-userdbd\n     43       1 root              0.0  0.1  4820 Ss       355 /usr/lib/systemd/systemd-nsresourced\n    113       1 root              0.0  0.0  2800 Ss+      354 /usr/bin/agetty --noreset --noclear - linux\n    301       1 root              0.0  0.0  1820 S        283 sleep 600\n    771      42 root              0.0  0.1  5792 S        161 systemd-userwork: waiting...\n    772      42 root              0.0  0.1  6004 S        120 systemd-userwork: waiting...\n    773      42 root              0.0  0.1  6096 S         63 systemd-userwork: waiting...\n    774      43 root              0.0  0.1  5104 S         48 systemd-nsresourcework: waiting...\n    775      43 root              0.0  0.1  5108 S         47 systemd-nsresourcework: waiting...\n    776      43 root              0.0  0.1  5152 S         45 systemd-nsresourcework: waiting...\n    777      43 root              0.0  0.1  5248 S         38 systemd-nsresourcework: waiting...\n    778      43 root              0.0  0.1  5388 S         36 systemd-nsresourcework: waiting...\n    893     875 root              0.0  0.0  3808 Rs         0 ps -e -o pid=,ppid=,user:16=,pcpu=,pmem=,rss=,stat=,etimes=,args= --sort=-pcpu --no-headers\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

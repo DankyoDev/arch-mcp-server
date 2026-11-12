@@ -1,0 +1,14 @@
+{
+  "cmd": [
+    "sed",
+    "-n",
+    "1,20p",
+    "/etc/pacman.conf"
+  ],
+  "exit": 0,
+  "stdout": "#\n# /etc/pacman.conf\n#\n# See the pacman.conf(5) manpage for option and repository directives\n\n#\n# GENERAL OPTIONS\n#\n[options]\n# The following paths are commented out with their default values listed.\n# If you wish to use different paths, uncomment and update the paths.\n#RootDir     = /\n#DBPath      = /var/lib/pacman/\n#CacheDir    = /var/cache/pacman/pkg/\n#LogFile     = /var/log/pacman.log\n#GPGDir      = /etc/pacman.d/gnupg/\n#HookDir     = /etc/pacman.d/hooks/\nHoldPkg     = pacman glibc\n#XferCommand = /usr/bin/curl -L -C - -f -o %o %u\n#XferCommand = /usr/bin/wget --passive-ftp -c -O %o %u\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

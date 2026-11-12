@@ -1,0 +1,12 @@
+{
+  "cmd": [
+    "cat",
+    "/usr/lib/systemd/system/sshd.service"
+  ],
+  "exit": 0,
+  "stdout": "[Unit]\nAfter=network.target sshdgenkeys.service\nBefore=ssh-access.target\nDescription=OpenSSH Daemon\nDocumentation=man:sshd(8) man:sshd_config(5)\nWants=sshdgenkeys.service ssh-access.target\n\n[Service]\nType=notify-reload\nExecStart=/usr/bin/sshd -D\nKillMode=process\nRestart=always\n\n[Install]\nWantedBy=multi-user.target\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

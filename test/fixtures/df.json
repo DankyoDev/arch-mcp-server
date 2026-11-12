@@ -1,0 +1,13 @@
+{
+  "cmd": [
+    "df",
+    "-P",
+    "-B1"
+  ],
+  "exit": 0,
+  "stdout": "Filesystem         1-blocks         Used    Available Capacity Mounted on\noverlay        501527592960   3528945664 472447262720       1% /\ntmpfs              67108864            0     67108864       0% /dev\nshm                67108864            0     67108864       0% /dev/shm\ntmpfs            2076274688       446464   2075828224       1% /run\n/dev/vda1      501527592960   3528945664 472447262720       1% /etc/hosts\nhost           510694256640 398979653632 111714603008      79% /keys/id_test.pub\ntmpfs            2076274688            0   2076274688       0% /run/lock\ntmpfs            2076278784            0   2076278784       0% /tmp\nnone                1048576            0      1048576       0% /run/credentials/systemd-resolved.service\nnone                1048576            0      1048576       0% /run/credentials/systemd-networkd.service\nnone                1048576            0      1048576       0% /run/credentials/getty@tty1.service\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}

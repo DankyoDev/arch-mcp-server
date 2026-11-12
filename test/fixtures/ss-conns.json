@@ -1,0 +1,14 @@
+{
+  "cmd": [
+    "ss",
+    "-tunapH",
+    "state",
+    "established"
+  ],
+  "exit": 0,
+  "stdout": "tcp 0      0      172.18.0.3:22 172.18.0.1:61668 users:((\"sshd-session\",pid=875,fd=7),(\"sshd-session\",pid=872,fd=7))\n",
+  "stderr": "",
+  "captured_at": "2026-11-12T16:33:06.959Z",
+  "host": "127.0.0.1:2223",
+  "synthetic": false
+}
